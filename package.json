@@ -1,5 +1,5 @@
 {
-  "name": "aitocomplete-clang",
+  "name": "autocomplete-clang",
   "main": "./lib/autocomplete-clang",
   "version": "0.1.0",
   "description": "autocomplete for C/C++/ObjC using clang",
