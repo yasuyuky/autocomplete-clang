@@ -5,7 +5,7 @@ like [emacs auto-complete-clang.el](https://github.com/brianjcj/auto-complete-cl
 
 **for `C`/`C++`/`Objective-C`**
 
-![Screenshot for how autocomplete works](https://www.dropbox.com/meta_dl/eyJzdWJfcGF0aCI6ICIiLCAidGVzdF9saW5rIjogZmFsc2UsICJzZXJ2ZXIiOiAiZGwuZHJvcGJveHVzZXJjb250ZW50LmNvbSIsICJpdGVtX2lkIjogbnVsbCwgImlzX2RpciI6IGZhbHNlLCAidGtleSI6ICJ5Njk3YWo4YnNtazQ2bjcifQ/AAIM3Oyps_9R4A_as_JNihGbdOCMCsdLNIWrSq0bzFb_hw?dl=1)
+![Screenshot for how autocomplete works](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang.gif)
 
 This package is currently experimental state.
 
@@ -29,7 +29,7 @@ Command for emitting precompiled header is easily access from menu.
 2. Choose `Packages` -> `Autocomplete Clang` -> `Emit Precompiled Header`
 3. Then package automatically detect emitted pch file.
 
-![Screenshot of emit-pch](https://www.dropbox.com/meta_dl/eyJzdWJfcGF0aCI6ICIiLCAidGVzdF9saW5rIjogZmFsc2UsICJzZXJ2ZXIiOiAiZGwuZHJvcGJveHVzZXJjb250ZW50LmNvbSIsICJpdGVtX2lkIjogbnVsbCwgImlzX2RpciI6IGZhbHNlLCAidGtleSI6ICI1YmRjNzM1enFkbzhmdmYifQ/AALbyL4CoIgttCvrI6H8cpUDrgKmz22hD2KZVcKu5UZoKA?dl=1)
+![Screenshot of emit-pch](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang-emit-pch.png)
 
 ### Notice
 
@@ -38,7 +38,7 @@ If you change `std` option after you emitted the pch, you should emit pch again.
 
 ## Settings
 
-![Screenshot of configuration](https://www.dropbox.com/meta_dl/eyJzdWJfcGF0aCI6ICIiLCAidGVzdF9saW5rIjogZmFsc2UsICJzZXJ2ZXIiOiAiZGwuZHJvcGJveHVzZXJjb250ZW50LmNvbSIsICJpdGVtX2lkIjogbnVsbCwgImlzX2RpciI6IGZhbHNlLCAidGtleSI6ICJzMjVjNmlmZHA2bzg5ZzgifQ/AAKWXyBGWCqRBdeHC_VOl0bBX9PH7vlBuy_m_LIIWGFZnw?dl=1)
+![Screenshot of configuration](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang-settings.png)
 
 ## Keymaps
 
