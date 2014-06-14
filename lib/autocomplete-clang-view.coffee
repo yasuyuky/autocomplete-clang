@@ -3,10 +3,11 @@ util = require './util'
 _ = require 'underscore-plus'
 {spawn} = require 'child_process'
 path = require 'path'
-{existsSync} = require 'fs'
+{existsSync, readFileSync} = require 'fs'
 Autocompleteview = require 'autocomplete/lib/autocomplete-view'
 snippets = require 'snippets/lib/snippets'
 {Range} = require 'atom'
+{File, Directory} = require 'pathwatcher'
 
 module.exports =
 class AutocompleteClangView extends Autocompleteview
@@ -87,6 +88,27 @@ class AutocompleteClangView extends Autocompleteview
     std = atom.config.get "autocomplete-clang.std.#{lang}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
+    # If someone already has a .clang_complete from vim configured, use that.
+    searchDir = path.dirname @editor.getPath()
+    while searchDir.length
+        searchFilePath = path.join searchDir, ".clang_complete"
+        searchFile = new File(searchFilePath)
+        if searchFile.exists()
+            contents = ""
+            try
+                contents = readFileSync(searchFilePath, 'utf8')
+            catch error
+                console.log "autocomplete-clang couldn't read file " + searchFilePath
+                console.log error
+            contentsArray = contents.split("\n")
+            args = args.concat contentsArray
+            args = args.concat ["-working-directory=#{searchDir}"] # All the includes will be relative to the .clang_complete
+            break
+        thisDir = new Directory(searchDir)
+        if thisDir.isRoot()
+            break
+        searchDir = thisDir.getParent().getPath()
+    return args
 
   convertClangCompletion: (s) ->
     s = s[12..]

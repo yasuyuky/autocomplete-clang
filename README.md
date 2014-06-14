@@ -7,7 +7,7 @@ like [emacs auto-complete-clang.el](https://github.com/brianjcj/auto-complete-cl
 
 ![Screenshot for how autocomplete works](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang.gif)
 
-This package is currently experimental state.
+This package is currently in an experimental state.
 
 ## Features
 
@@ -33,12 +33,23 @@ Command for emitting precompiled header is easily access from menu.
 
 ### Notice
 
-If you change `std` option after you emitted the pch, you should emit pch again.
+If you change the `std` option after you emitted the pch, you should emit pch again.
 
 
 ## Settings
 
+### Global
+
 ![Screenshot of configuration](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang-settings.png)
+
+### Project
+
+autocomplete-clang will look for a .clang_complete file as used by vim's [clang_complete](https://github.com/Rip-Rip/clang_complete) plugin, by searching up the directory tree. If it finds one, it'll use this to add parameters passed to clang. Use this for adding project-specific defines or include paths. The format is simply one parameter per line, e.g.
+```
+  -I/opt/qt/5.3/clang_64/lib/QtWebKitWidgets.framework/Versions/5/Headers
+  -I/opt/qt/5.3/clang_64/lib/QtMultimedia.framework/Versions/5/Headers
+  -DSWIFT_EXPERIMENTAL_FT
+```
 
 ## Keymaps
 
