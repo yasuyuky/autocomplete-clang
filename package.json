@@ -12,6 +12,7 @@
   "dependencies": {
     "underscore-plus": "1.x",
     "autocomplete": "git://github.com/atom/autocomplete.git#v0.28.0",
-    "snippets": "git://github.com/atom/snippets.git#v0.43.0"
+    "snippets": "git://github.com/atom/snippets.git#v0.43.0",
+    "pathwatcher": "^1.0"
   }
 }
