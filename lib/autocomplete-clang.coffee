@@ -135,7 +135,7 @@ module.exports =
     file = [(atom.config.get "autocomplete-clang.pchFilePrefix"), lang, "pch"].join '.'
     pch = path.join dir,file
     std = atom.config.get "autocomplete-clang.std.#{lang}"
-    args = ['-cc1', "-x#{lang}-header", '-emit-pch', '-o', pch]
+    args = ["-x#{lang}-header", "-Xclang", '-emit-pch', '-o', pch]
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
     args = args.concat ["-"]

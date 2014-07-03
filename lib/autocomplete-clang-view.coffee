@@ -80,15 +80,16 @@ class AutocompleteClangView extends Autocompleteview
 
   buildClangArgs: (row, column, lang)->
     pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), lang, "pch"].join '.'
-    args = ["-cc1", "-fsyntax-only", "-x#{lang}",
-            "-code-completion-at", (["-",row+1,column+1].join ':'),
-           ]
+    args = ["-fsyntax-only", "-x#{lang}", "-Xclang"]
+    location = (["-",row+1,column+1].join ':')
+    args = args.concat ["-code-completion-at=#{location}"]
     pchPath = path.join (path.dirname @editor.getPath()), pch
     args = args.concat ["-include-pch", pch] if existsSync pchPath
     std = atom.config.get "autocomplete-clang.std.#{lang}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
     args = args.concat ClangFlags.getClangFlags(atom.workspace.getActiveEditor().getPath())
+    args = args.concat ["-"]
 
   convertClangCompletion: (s) ->
     s = s[12..]
