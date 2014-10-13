@@ -7,12 +7,12 @@
   "repository": "https://github.com/yasuyuky/autocomplete-clang",
   "license": "MIT",
   "engines": {
-    "atom": ">0.50.0"
+    "atom": ">=0.136.0"
   },
   "dependencies": {
     "underscore-plus": "1.x",
-    "autocomplete": "git://github.com/atom/autocomplete.git#v0.28.0",
-    "snippets": "git://github.com/atom/snippets.git#v0.43.0",
-    "clang-flags": "^0.1.0"
+    "snippets": "git://github.com/atom/snippets.git#v0.55.0",
+    "pathwatcher": "^2.1.3",
+    "clang-flags": "0.1.2"
   }
 }

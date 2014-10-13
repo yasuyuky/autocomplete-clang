@@ -11,7 +11,6 @@ module.exports =
     pchFilePrefix: ".stdafx"
     enableAutoToggle: true
     autoToggleKeys: [".","#","::","->"]
-    appendDefaultOutputOfAutocomplete: false
     std:
       "c++": "c++03"
       "c": "c99"
@@ -99,8 +98,8 @@ module.exports =
         "wchar.h",
         "wctype.h",
       ],
-      "objc": [],
-      "objc++": [],
+      "objective-c": [],
+      "objective-c++": [],
     }
 
   autocompleteClangViews: []
@@ -148,5 +147,7 @@ module.exports =
     alert "Emiting precompiled header exit with #{code}\nSee console for detailed error message"
 
   deactivate: ->
-    for view in @autocompleteClangViews
-      view.destroy()
+    @editorSubscription?.off()
+    @editorSubscription = null
+    @autocompleteClangViews.forEach (autocompleteView) -> autocompleteView.remove()
+    @autocompleteClangViews = []

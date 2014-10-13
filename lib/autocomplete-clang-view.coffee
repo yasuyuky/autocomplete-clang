@@ -4,14 +4,30 @@ _ = require 'underscore-plus'
 {spawn} = require 'child_process'
 path = require 'path'
 {existsSync} = require 'fs'
-Autocompleteview = require 'autocomplete/lib/autocomplete-view'
 snippets = require 'snippets/lib/snippets'
-{Range} = require 'atom'
+{$,$$,Range,SelectListView} = require 'atom'
+
 ClangFlags = require 'clang-flags'
 
 module.exports =
-class AutocompleteClangView extends Autocompleteview
+class AutocompleteClangView extends SelectListView
   clangOutput: ""
+  wordRegex: /\w+/g
+
+  initialize: (@editorView) ->
+    super
+    @addClass('autocomplete popover-list')
+    {@editor} = @editorView
+    @handleEvents()
+    @setCurrentBuffer(@editor.getBuffer())
+
+  getFilterKey: ->
+    'word'
+
+  viewForItem: ({label}) ->
+    $$ ->
+      @li =>
+        @span label[..50]
 
   handleEvents: ->
     @list.on 'mousewheel', (event) -> event.stopPropagation()
@@ -21,21 +37,34 @@ class AutocompleteClangView extends Autocompleteview
     @editorView.command 'autocomplete:next', => @selectNextItemView()
     @editorView.command 'autocomplete:previous', => @selectPreviousItemView()
     if atom.config.get 'autocomplete-clang.enableAutoToggle'
-      @editor.getBuffer().on 'changed', (event) => @handleChanged event
+      @editor.getBuffer().on "changed", (e) => @handleChanged(e) if e.newText
 
-    @filterEditorView.preempt 'textInput', ({originalEvent}) =>
-      text = originalEvent.data
+    @filterEditorView.getModel().on 'will-insert-text', ({cancel, text}) =>
       unless text.match(@wordRegex)
         @confirmSelection()
         @editor.insertText(text)
-        false
+        cancel()
+
+  setCurrentBuffer: (@currentBuffer) ->
+
+  selectItemView: (item) ->
+    super
+    if match = @getSelectedItem()
+      @replaceSelectedTextWithMatch(match)
+
+  selectNextItemView: ->
+    super
+    false
+
+  selectPreviousItemView: ->
+    super
+    false
 
   handleChanged: (event)->
     return if @hasParent()
+    pos = @editor.getCursorBufferPosition()
     for c in atom.config.get "autocomplete-clang.autoToggleKeys"
-      if c[-1..] == event.newText[-1..] and (
-        c.length == 1 or
-        c == @getBufferTextInColumnDelta event.newRange.end, -1*c.length)
+      if c[-1..] == event.newText and c == @getBufferTextInColumnDelta(pos, -1*c.length)
         @editor.commitTransaction()
         @editor.beginTransaction()
         @toggle()
@@ -58,11 +87,9 @@ class AutocompleteClangView extends Autocompleteview
       selection.getBufferRange()
     @originalCursorPosition = @editor.getCursorScreenPosition()
 
-    return @cancel() unless @allPrefixAndSuffixOfSelectionsMatch()
     @buildWordList()
 
   buildWordList: ->
-    super if atom.config.get("autocomplete-clang.appendDefaultOutputOfAutocomplete")
     firstCursorPosition = @editor.getCursors()[0].getBufferPosition()
     lang = util.getFirstCursorSourceScopeLang @editor
     return @cancel unless lang
@@ -88,7 +115,11 @@ class AutocompleteClangView extends Autocompleteview
     std = atom.config.get "autocomplete-clang.std.#{lang}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
-    args = args.concat ClangFlags.getClangFlags(atom.workspace.getActiveEditor().getPath())
+    try
+      clangflags = ClangFlags.getClangFlags(atom.workspace.getActiveTextEditor().getPath())
+      args = args.concat clanflags if clangflags
+    catch error
+      console.log error
     args = args.concat ["-"]
 
   convertClangCompletion: (s) ->
@@ -97,10 +128,11 @@ class AutocompleteClangView extends Autocompleteview
     s = s.replace /^[^ ]+\s:\s/, ""
     s = s.replace /\[#(.*?)#\]/g, ""
     i = 0
-    s = s.replace /<#(.*?)#>/g, (match,p1) ->
+    snipet = s.replace /<#(.*?)#>|{#(.*?)#}/g, (match,p1,p2) ->
       ++i
-      "${#{i}:#{p1}}"
-    return {word:s, prefix:'',suffix:'',label:if l then l[0] else s} if s
+      "${#{i}:#{p1 or p2}}"
+    slabel = s.replace /<#(.*?)#>/g, (match,p1) -> "#{p1}"
+    return {word:snipet, label:slabel} if s
 
   handleCompletionOutput: (data) ->
     @clangOutput += data.toString()
@@ -109,25 +141,56 @@ class AutocompleteClangView extends Autocompleteview
     if code
       console.log "Unexpected return code of clang command:",code
       return @cancel()
-    completions = _.remove (@convertClangCompletion(s) for s in @clangOutput.trim().split '\n'), undefined
-    matches = if @wordList then @findMatchesForCurrentSelection() else []
-    items = completions.concat matches
+    completions = (@convertClangCompletion(s) for s in @clangOutput.trim().split '\n')
+    items = _.remove completions, undefined
     @setItems items
-    switch items.length
-      when 0
-        @cancel()
-      when 1
-        @confirmSelection()
-      else
-        @editorView.appendToLinesView this
-        @setPosition()
-        @focusFilterEditor()
+    if items.length == 1
+      @Selection()
+    else
+      @editorView.appendToLinesView(this)
+      @setPosition()
+      @focusFilterEditor()
 
   handleClangError: (data)->
     console.log data.toString()
 
+  cancelled: ->
+    super
+    unless @editor.isDestroyed()
+      @editor.abortTransaction()
+      @editor.setSelectedBufferRanges(@originalSelectionBufferRanges)
+      @editorView.focus()
+
+  replaceSelectedTextWithMatch: (match) ->
+    newSelectedBufferRanges = []
+
+    @editor.getSelections().forEach (selection, i) =>
+      startPosition = selection.getBufferRange().start
+      selection.deleteSelectedText()
+      cursorPosition = @editor.getCursors()[i].getBufferPosition()
+      newSelectedBufferRanges.push([startPosition, [startPosition.row, startPosition.column + match.word.length]])
+
+    @editor.insertText(match.word)
+    @editor.setSelectedBufferRanges(newSelectedBufferRanges)
+
+  setPosition: ->
+    {left, top} = @editorView.pixelPositionForScreenPosition(@originalCursorPosition)
+    height = @outerHeight()
+    width = @outerWidth()
+    potentialTop = top + @editorView.lineHeight
+    potentialBottom = potentialTop - @editorView.scrollTop() + height
+    parentWidth = @parent().width()
+
+    left = parentWidth - width if left + width > parentWidth
+
+    if @aboveCursor or potentialBottom > @editorView.outerHeight()
+      @aboveCursor = true
+      @css(left: left, top: top - height, bottom: 'inherit')
+    else
+      @css(left: left, top: potentialTop, bottom: 'inherit')
+
   confirmed: (match) ->
-    @editor.getSelections().forEach (selection) -> selection.clear()
-    @cancel()
     return unless match
-    snippets.insert match.word
+    @cancel()
+    @editor.getCursors().forEach (cursor) ->
+      snippets.insert(match.word, @editor, cursor)
