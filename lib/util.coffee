@@ -1,8 +1,8 @@
 clangSourceScopeDictionary = {
   'source.c++'    : 'c++' ,
   'source.c'      : 'c' ,
-  'source.objc'   : 'objc' ,
-  'source.objc++' : 'objc++' ,
+  'source.objc'   : 'objective-c' ,
+  'source.objc++' : 'objective-c++' ,
 }
 
 module.exports =
