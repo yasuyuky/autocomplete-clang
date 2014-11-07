@@ -117,7 +117,7 @@ class AutocompleteClangView extends SelectListView
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
     try
       clangflags = ClangFlags.getClangFlags(atom.workspace.getActiveTextEditor().getPath())
-      args = args.concat clanflags if clangflags
+      args = args.concat clangflags if clangflags
     catch error
       console.log error
     args = args.concat ["-"]
