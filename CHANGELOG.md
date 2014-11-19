@@ -1,3 +1,6 @@
+## 0.3.2
+* Fix problem with new rule of transaction (works with Atom 0.147.0)
+
 ## 0.3.1
 * Fix problem with objc
 
