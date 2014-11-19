@@ -1,3 +1,6 @@
+## 0.3.3
+* Fix invalid input when auto toggle is disabled
+
 ## 0.3.2
 * Fix problem with new rule of transaction (works with Atom 0.147.0)
 

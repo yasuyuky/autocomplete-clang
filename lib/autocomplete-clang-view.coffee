@@ -84,9 +84,9 @@ class AutocompleteClangView extends SelectListView
       selection.getBufferRange()
     @originalCursorPosition = @editor.getCursorScreenPosition()
     items = @buildWordList()
-    @setItems items
     if items and items.length
       @editor.beginTransaction()
+      @setItems items
       @editorView.appendToLinesView(this)
       @setPosition()
       @focusFilterEditor()
