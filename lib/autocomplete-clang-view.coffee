@@ -4,8 +4,7 @@ _ = require 'underscore-plus'
 {spawnSync} = require 'child_process'
 path = require 'path'
 {existsSync} = require 'fs'
-snippets = require 'snippets/lib/snippets'
-{$,$$,Range,SelectListView} = require 'atom'
+{$$,Range,SelectListView} = require 'atom'
 
 ClangFlags = require 'clang-flags'
 
@@ -20,6 +19,8 @@ class AutocompleteClangView extends SelectListView
     {@editor} = @editorView
     @handleEvents()
     @setCurrentBuffer(@editor.getBuffer())
+    if atom.packages.isPackageLoaded("snippets")
+      @snippets = atom.packages.getLoadedPackage("snippets").mainModule
 
   getFilterKey: ->
     'word'
@@ -159,7 +160,7 @@ class AutocompleteClangView extends SelectListView
       cursorPosition = @editor.getCursors()[i].getBufferPosition()
       range = [startPosition.row, startPosition.column + match.word.length]
       newSelectedBufferRanges.push([startPosition, range])
-    @editor.insertText(match.word)
+    @editor.insertText match.label
     @editor.setSelectedBufferRanges(newSelectedBufferRanges)
 
   setPosition: ->
@@ -180,5 +181,8 @@ class AutocompleteClangView extends SelectListView
   confirmed: (match) ->
     return unless match
     @cancel()
-    @editor.getCursors().forEach (cursor) =>
-      snippets.insert(match.word, @editor, cursor)
+    if @snippets
+      @editor.getCursors().forEach (cursor) =>
+        @snippets.insert match.word
+    else
+      @editor.insertText match.label

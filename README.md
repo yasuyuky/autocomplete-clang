@@ -72,6 +72,15 @@ See Customizing Atom for more details.
 
 MIT (See License file)
 
+## Update problems
+
+    Error message: Module version mismatch.
+
+If you got a such kind of errors after AtomEditor update, Try following commands.
+
+    cd ~/.atom/package/autocomplete-clang/
+    rm -rf node_modules && apm install
+
 ## Misc
 
 - Motivation of the original author is `C++`,

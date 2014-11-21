@@ -1,3 +1,6 @@
+## 0.4
+* Improved snippets behavior
+
 ## 0.3.3
 * Fix invalid input when auto toggle is disabled
 
