@@ -9,6 +9,11 @@ like [emacs auto-complete-clang.el](https://github.com/brianjcj/auto-complete-cl
 
 This package is currently in an experimental state.
 
+## Requirement
+
+- **[clang](http://clang.llvm.org/)**
+
+
 ## Features
 
 - Providing completions by clang
