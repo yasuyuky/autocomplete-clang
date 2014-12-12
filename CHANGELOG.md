@@ -1,5 +1,6 @@
 ## 0.5
 * Add "Igonore Clang Error" option
+* Add error handling for the case that clang is not installed
 
 ## 0.4
 * Improved snippets behavior

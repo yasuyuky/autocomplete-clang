@@ -135,6 +135,9 @@ class AutocompleteClangView extends SelectListView
     return {word:snipet, label:slabel} if s
 
   handleCompletionResult: (result) ->
+    if result.error
+      console.log result.error
+      return
     if result.status
       console.log "Unexpected return code of clang command:", result.status
       console.log result.stderr.toString()
