@@ -11,6 +11,7 @@ module.exports =
     pchFilePrefix: ".stdafx"
     enableAutoToggle: true
     autoToggleKeys: [".","#","::","->"]
+    ignoreClangErrors: false
     std:
       "c++": "c++03"
       "c": "c99"

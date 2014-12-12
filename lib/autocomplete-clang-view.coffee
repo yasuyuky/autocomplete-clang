@@ -138,7 +138,7 @@ class AutocompleteClangView extends SelectListView
     if result.status
       console.log "Unexpected return code of clang command:", result.status
       console.log result.stderr.toString()
-      return
+      return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     outputLines = result.stdout.toString().trim().split '\n'
     completions = (@convertCompletionLine(s) for s in outputLines)
     items = _.remove completions, undefined

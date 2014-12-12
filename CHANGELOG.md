@@ -1,3 +1,6 @@
+## 0.5
+* Add "Igonore Clang Error" option
+
 ## 0.4
 * Improved snippets behavior
 
