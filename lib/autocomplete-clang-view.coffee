@@ -186,6 +186,6 @@ class AutocompleteClangView extends SelectListView
     @cancel()
     if @snippets
       @editor.getCursors().forEach (cursor) =>
-        @snippets.insert match.word
+        @snippets.insert match.word,@editor,cursor
     else
       @editor.insertText match.label
