@@ -81,8 +81,6 @@ class AutocompleteClangView extends SelectListView
 
   attach: ->
     @aboveCursor = false
-    @originalSelectionBufferRanges = @editor.getSelections().map (selection) ->
-      selection.getBufferRange()
     @originalCursorPosition = @editor.getCursorScreenPosition()
     items = @buildWordList()
     if items and items.length
@@ -150,7 +148,6 @@ class AutocompleteClangView extends SelectListView
     super
     unless @editor.isDestroyed()
       @editor.abortTransaction()
-      @editor.setSelectedBufferRanges @originalSelectionBufferRanges
       @editor.insertText @prefix
       @editorView.focus()
 

@@ -1,3 +1,6 @@
+## 0.5.2
+* Fix problem that insert completion into wrong position
+
 ## 0.5.1
 * Fix problem with multiple cursors
 
