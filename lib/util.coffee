@@ -1,7 +1,11 @@
 clangSourceScopeDictionary = {
-  'source.c++'    : 'c++' ,
+  'source.cpp'    : 'c++' ,
   'source.c'      : 'c' ,
   'source.objc'   : 'objective-c' ,
+  'source.objcpp' : 'objective-c++' ,
+
+  # For backward-compatibility with versions of Atom < 0.166
+  'source.c++'    : 'c++' ,
   'source.objc++' : 'objective-c++' ,
 }
 
