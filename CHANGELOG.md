@@ -1,3 +1,7 @@
+## 0.5.3
+* Merge pull-request #23 to handle new scope names for C++, Objective-C++
+* Update package.json to use forked version of "clang-flags"
+
 ## 0.5.2
 * Fix problem that insert completion into wrong position
 
