@@ -11,6 +11,6 @@
   },
   "dependencies": {
     "underscore-plus": "1.x",
-    "clang-flags": "git://github.com/yasuyuky/clang-flags.git"
+    "clang-flags": "git://github.com/wanderer2/clang-flags.git"
   }
 }
