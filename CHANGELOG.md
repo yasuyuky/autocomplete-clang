@@ -1,3 +1,6 @@
+## 0.5.4
+* Merge pull-request #27 to fixed clang-flags repo.
+
 ## 0.5.3
 * Merge pull-request #23 to handle new scope names for C++, Objective-C++
 * Update package.json to use forked version of "clang-flags"
