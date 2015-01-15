@@ -4,7 +4,8 @@ _ = require 'underscore-plus'
 {spawnSync} = require 'child_process'
 path = require 'path'
 {existsSync} = require 'fs'
-{$$,Range,SelectListView} = require 'atom'
+{Range, CompositeDisposable} = require 'atom'
+{$, $$, SelectListView}  = require 'atom-space-pen-views'
 
 ClangFlags = require 'clang-flags'
 
@@ -13,10 +14,9 @@ class AutocompleteClangView extends SelectListView
   clangOutput: ""
   wordRegex: /\w+/g
 
-  initialize: (@editorView) ->
+  initialize: (@editor) ->
     super
     @addClass('autocomplete popover-list')
-    {@editor} = @editorView
     @handleEvents()
     @setCurrentBuffer(@editor.getBuffer())
     if atom.packages.isPackageLoaded("snippets")
@@ -33,14 +33,9 @@ class AutocompleteClangView extends SelectListView
   handleEvents: ->
     @list.on 'mousewheel', (event) -> event.stopPropagation()
 
-    @editorView.on 'editor:path-changed', => @setCurrentBuffer(@editor.getBuffer())
-    @editorView.command 'autocomplete-clang:toggle', => @toggle ""
-    @editorView.command 'autocomplete:next', => @selectNextItemView()
-    @editorView.command 'autocomplete:previous', => @selectPreviousItemView()
-    if atom.config.get 'autocomplete-clang.enableAutoToggle'
-      @editor.getBuffer().onDidChange (e) => @handleChanged(e) if e.newText
+    @editor.onDidChangePath => @setCurrentBuffer(@editor.getBuffer())
 
-    @filterEditorView.getModel().on 'will-insert-text', ({cancel, text}) =>
+    @filterEditorView.getModel().onWillInsertText ({cancel, text}) =>
       unless text.match(@wordRegex)
         @confirmSelection()
         @editor.insertText text
@@ -60,20 +55,20 @@ class AutocompleteClangView extends SelectListView
     super
     false
 
-  handleChanged: (event)->
-    return if @hasParent()
+  handleTextInsertion: (event)->
+    return if @isVisible()
     pos = @editor.getCursorBufferPosition()
     for c in atom.config.get "autocomplete-clang.autoToggleKeys"
-      if c[-1..] == event.newText
+      if c[-1..] == event.text
         if c == @getBufferTextInColumnDelta(pos, -1*c.length)
-          @toggle event.newText
+          @toggle event.text
 
   getBufferTextInColumnDelta: (point,columnDelta)->
     r = Range.fromPointWithDelta(point,0,columnDelta)
     return @editor.getBuffer().getTextInRange r
 
   toggle: (prefix) ->
-    if @hasParent()
+    if @isVisible()
       @cancel()
     else
       @prefix = prefix
@@ -84,11 +79,14 @@ class AutocompleteClangView extends SelectListView
     @originalCursorPosition = @editor.getCursorScreenPosition()
     items = @buildWordList()
     if items and items.length
+      # try
+      #   @checkpoint = @editor.createCheckpoint()
+      # catch error
+      #   console.log error
       @editor.beginTransaction()
       @setItems items
-      @editorView.appendToLinesView(this)
-      @setPosition()
-      @focusFilterEditor()
+      cursorMarker = @editor.getLastCursor().getMarker()
+      @overlayDecoration = @editor.decorateMarker(cursorMarker, type: 'overlay', position: 'tail', item: this)
 
   buildWordList: ->
     firstCursorPosition = @editor.getCursors()[0].getBufferPosition()
@@ -145,11 +143,11 @@ class AutocompleteClangView extends SelectListView
     items = _.remove completions, undefined
 
   cancelled: ->
-    super
+    @overlayDecoration?.destroy()
     unless @editor.isDestroyed()
-      @editor.abortTransaction()
-      @editor.insertText @prefix
-      @editorView.focus()
+      @editor.abortTransaction() # @editor.revertToCheckpoint(@checkpoint)
+      @editor.insertText @prefix if @prefix
+      atom.workspace.getActivePane().activate()
 
   replaceSelectedTextWithMatch: (match) ->
     newSelectedBufferRanges = []
@@ -163,20 +161,15 @@ class AutocompleteClangView extends SelectListView
     @editor.insertText match.label
     @editor.setSelectedBufferRanges(newSelectedBufferRanges)
 
-  setPosition: ->
-    {left, top} = @editorView.pixelPositionForScreenPosition(@originalCursorPosition)
-    [height, width] = [@outerHeight(), @outerWidth()]
-    potentialTop = top + @editorView.lineHeight
-    potentialBottom = potentialTop - @editorView.scrollTop() + height
-    parentWidth = @parent().width()
+  attached: ->
+    @focusFilterEditor()
+    widestCompletion = parseInt(@css('min-width')) or 0
+    @list.find('span').each ->
+      widestCompletion = Math.max(widestCompletion, $(this).outerWidth())
+    @list.width(widestCompletion)
+    @width(@list.outerWidth())
 
-    left = parentWidth - width if left + width > parentWidth
-
-    if @aboveCursor or potentialBottom > @editorView.outerHeight()
-      @aboveCursor = true
-      @css(left: left, top: top - height, bottom: 'inherit')
-    else
-      @css(left: left, top: potentialTop, bottom: 'inherit')
+  detached: ->
 
   confirmed: (match) ->
     return unless match

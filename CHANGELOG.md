@@ -1,3 +1,6 @@
+## 0.6
+* Update APIs (except APIs for transaction)
+
 ## 0.5.4
 * Merge pull-request #27 to fixed clang-flags repo.
 

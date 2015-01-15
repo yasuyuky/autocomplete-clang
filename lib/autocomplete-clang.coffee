@@ -3,6 +3,7 @@ util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
 _ = require 'underscore-plus'
+{CompositeDisposable,Disposable} = require 'atom'
 
 module.exports =
   configDefaults:
@@ -103,28 +104,51 @@ module.exports =
       "objective-c++": [],
     }
 
-  autocompleteClangViews: []
+  autocompleteClangViewsByEditor: null
+  deactivationDisposables: null
 
   activate: (state) ->
-    @editorSubscription = atom.workspaceView.eachEditorView (editor) =>
-      if editor.attached and not editor.mini
-        autocompleteClangView = new AutocompleteClangView(editor)
-        editor.on 'editor:will-be-removed', =>
-          autocompleteClangView.remove() unless autocompleteClangView.hasParent()
-          _.remove @autocompleteClangViews, autocompleteClangView
-        @autocompleteClangViews.push(autocompleteClangView)
-        editor.command "autocomplete-clang:emit-pch", => @emitPch editor.getEditor()
+    @autocompleteClangViewsByEditor = new WeakMap
+    getAutocompleteClangView = (editorElement) =>
+      @autocompleteClangViewsByEditor.get(editorElement.getModel())
+
+    @deactivationDisposables = new CompositeDisposable
+
+    @deactivationDisposables.add atom.workspace.observeTextEditors (editor) =>
+      return if editor.mini
+
+      autocompleteClangView = new AutocompleteClangView(editor)
+      @autocompleteClangViewsByEditor.set(editor, autocompleteClangView)
+
+      disposable = new Disposable -> autocompleteClangView.remove()
+      @deactivationDisposables.add editor.onDidDestroy -> disposable.dispose()
+      @deactivationDisposables.add disposable
+
+      @deactivationDisposables.add editor.onDidInsertText (e) ->
+        if atom.config.get 'autocomplete-clang.enableAutoToggle'
+          autocompleteClangView?.handleTextInsertion(e)
+
+    @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
+      'autocomplete-clang:toggle': ->
+        getAutocompleteClangView(this)?.toggle()
+      'autocomplete:next': =>
+        getAutocompleteClangView(this)?.selectNextItemView()
+      'autocomplete:previous': =>
+        getAutocompleteClangView(this)?.selectPreviousItemView()
+      'autocomplete-clang:emit-pch': =>
+        @emitPch this
 
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
     unless lang
       alert "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return
+    clang_command = atom.config.get "autocomplete-clang.clangCommand"
     args = @buildEmitPchCommandArgs editor,lang
-    emit_process = spawn (atom.config.get "autocomplete-clang.clangCommand"),args
+    emit_process = spawn clang_command,args
     emit_process.on "exit", (code) => @handleEmitPchResult code
-    emit_process.stdout.on 'data', (data) => console.log "out:\n"+data.toString()
-    emit_process.stderr.on 'data', (data) => console.log "err:\n"+data.toString()
+    emit_process.stdout.on 'data', (data)-> console.log "out:\n"+data.toString()
+    emit_process.stderr.on 'data', (data)-> console.log "err:\n"+data.toString()
     headers = atom.config.get "autocomplete-clang.preCompiledHeaders.#{lang}"
     headersInput = ("#include <#{h}>" for h in headers).join "\n"
     emit_process.stdin.write headersInput
@@ -132,12 +156,14 @@ module.exports =
 
   buildEmitPchCommandArgs: (editor,lang)->
     dir = path.dirname editor.getPath()
-    file = [(atom.config.get "autocomplete-clang.pchFilePrefix"), lang, "pch"].join '.'
+    pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
+    file = [pch_file_prefix, lang, "pch"].join '.'
     pch = path.join dir,file
     std = atom.config.get "autocomplete-clang.std.#{lang}"
     args = ["-x#{lang}-header", "-Xclang", '-emit-pch', '-o', pch]
     args = args.concat ["-std=#{std}"] if std
-    args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
+    include_paths = atom.config.get "autocomplete-clang.includePaths"
+    args = args.concat ("-I#{i}" for i in include_paths)
     args = args.concat ["-"]
     return args
 
@@ -145,10 +171,9 @@ module.exports =
     unless code
       alert "Emiting precompiled header has successfully finished"
       return
-    alert "Emiting precompiled header exit with #{code}\nSee console for detailed error message"
+    alert "Emiting precompiled header exit with #{code}\n"+
+      "See console for detailed error message"
 
   deactivate: ->
-    @editorSubscription?.off()
-    @editorSubscription = null
-    @autocompleteClangViews.forEach (autocompleteView) -> autocompleteView.remove()
-    @autocompleteClangViews = []
+    @deactivationDisposables.dispose()
+    console.log "autocomplete-clang deactivated"
