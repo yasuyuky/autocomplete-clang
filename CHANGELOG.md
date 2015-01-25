@@ -1,3 +1,6 @@
+## 0.6.1
+* Merge pull-request #29 to Use tag instead of deprecated class in keymap
+
 ## 0.6
 * Update APIs (except APIs for transaction)
 
