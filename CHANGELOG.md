@@ -1,3 +1,6 @@
+## 0.6.2
+* Update package.json to fix the installation problem / solve #35, #34
+
 ## 0.6.1
 * Merge pull-request #29 to Use tag instead of deprecated class in keymap
 
