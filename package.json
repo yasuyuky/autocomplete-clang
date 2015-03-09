@@ -1,7 +1,7 @@
 {
   "name": "autocomplete-clang",
   "main": "./lib/autocomplete-clang",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "autocomplete for C/C++/ObjC using clang",
   "activationEvents": [],
   "repository": "https://github.com/yasuyuky/autocomplete-clang",
@@ -12,6 +12,6 @@
   "dependencies": {
     "atom-space-pen-views": "^0.20.0",
     "underscore-plus": "1.x",
-    "clang-flags": "git://github.com/Kev/clang-flags.git"
+    "clang-flags": ">=0.2.1"
   }
 }
