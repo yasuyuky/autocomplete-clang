@@ -1,3 +1,6 @@
+## 0.6.3
+* Update package.json (again) to point out specific version of clang-flags
+
 ## 0.6.2
 * Update package.json to fix the installation problem / solve #35, #34
 
