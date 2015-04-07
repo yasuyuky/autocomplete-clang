@@ -1,3 +1,6 @@
+## 0.6.4
+* Fix undefined function in emit-pch
+
 ## 0.6.3
 * Update package.json (again) to point out specific version of clang-flags
 
