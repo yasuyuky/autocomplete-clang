@@ -1,3 +1,6 @@
+## 0.6.5
+* Replace old API (scopesForBufferPosition)
+
 ## 0.6.4
 * Fix undefined function in emit-pch
 
