@@ -79,10 +79,6 @@ class AutocompleteClangView extends SelectListView
     @originalCursorPosition = @editor.getCursorScreenPosition()
     items = @buildWordList()
     if items and items.length
-      # try
-      #   @checkpoint = @editor.createCheckpoint()
-      # catch error
-      #   console.log error
       @editor.beginTransaction()
       @setItems items
       cursorMarker = @editor.getLastCursor().getMarker()
@@ -145,9 +141,10 @@ class AutocompleteClangView extends SelectListView
   cancelled: ->
     @overlayDecoration?.destroy()
     unless @editor.isDestroyed()
-      @editor.abortTransaction() # @editor.revertToCheckpoint(@checkpoint)
-      @editor.insertText @prefix if @prefix
-      atom.workspace.getActivePane().activate()
+      try
+        @editor.abortTransaction() # @editor.revertToCheckpoint(@checkpoint)
+        @editor.insertText @prefix if @prefix
+        atom.workspace.getActivePane().activate()
 
   replaceSelectedTextWithMatch: (match) ->
     newSelectedBufferRanges = []

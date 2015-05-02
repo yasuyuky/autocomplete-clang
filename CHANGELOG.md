@@ -1,3 +1,6 @@
+## 0.6.6
+* Fix crash with insertion of punctuation / solve #39
+
 ## 0.6.5
 * Replace old API (scopesForBufferPosition)
 
