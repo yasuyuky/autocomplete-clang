@@ -104,7 +104,7 @@ class AutocompleteClangView extends SelectListView
     args = args.concat ["-code-completion-at=#{location}"]
     pchPath = path.join (path.dirname @editor.getPath()), pch
     args = args.concat ["-include-pch", pch] if existsSync pchPath
-    std = atom.config.get "autocomplete-clang.std.#{lang}"
+    std = atom.config.get "autocomplete-clang.std #{lang}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
     try

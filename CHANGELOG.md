@@ -1,3 +1,6 @@
+## 0.6.8
+* Update config settings / solve #44
+
 ## 0.6.7
 * Fix emitPch command
 

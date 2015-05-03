@@ -6,18 +6,38 @@ _ = require 'underscore-plus'
 {CompositeDisposable,Disposable} = require 'atom'
 
 module.exports =
-  configDefaults:
-    clangCommand: "clang"
-    includePaths: ["."]
-    pchFilePrefix: ".stdafx"
-    enableAutoToggle: true
-    autoToggleKeys: [".","#","::","->"]
-    ignoreClangErrors: false
-    std:
-      "c++": "c++03"
-      "c": "c99"
-    preCompiledHeaders: {
-      "c++":[
+  config:
+    clangCommand:
+      type: 'string'
+      default: 'clang'
+    includePaths:
+      type: 'array'
+      default: ['.']
+      items:
+        type: 'string'
+    pchFilePrefix:
+      type: 'string'
+      default: '.stdafx'
+    enableAutoToggle:
+      type: 'boolean'
+      default: true
+    autoToggleKeys:
+      type: 'array'
+      default: [".","#","::","->"]
+      items:
+        type: 'string'
+    ignoreClangErrors:
+      type: 'boolean'
+      default: true
+    "std c++":
+      type: 'string'
+      default: "c++11"
+    "std c":
+      type: 'string'
+      default: "c99"
+    "preCompiledHeaders c++":
+      type: 'array'
+      default: [
         "cassert",
         "cctype",
         "cerrno",
@@ -68,8 +88,12 @@ module.exports =
         "typeinfo",
         "utility",
         "valarray",
-      ],
-      "c": [
+      ]
+      item:
+        type: 'string'
+    "preCompiledHeaders c":
+      type: 'array'
+      default: [
         "assert.h",
         "complex.h",
         "ctype.h",
@@ -99,10 +123,19 @@ module.exports =
         "uchar.h",
         "wchar.h",
         "wctype.h",
-      ],
-      "objective-c": [],
-      "objective-c++": [],
-    }
+      ]
+      items:
+        type: 'string'
+    "preCompiledHeaders objective-c":
+      type: 'array'
+      default: []
+      items:
+        type: 'string'
+    "preCompiledHeaders objective-c++":
+      type: 'array'
+      default: []
+      items:
+        type: 'string'
 
   autocompleteClangViewsByEditor: null
   deactivationDisposables: null
@@ -149,7 +182,7 @@ module.exports =
     emit_process.on "exit", (code) => @handleEmitPchResult code
     emit_process.stdout.on 'data', (data)-> console.log "out:\n"+data.toString()
     emit_process.stderr.on 'data', (data)-> console.log "err:\n"+data.toString()
-    headers = atom.config.get "autocomplete-clang.preCompiledHeaders.#{lang}"
+    headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
     headersInput = ("#include <#{h}>" for h in headers).join "\n"
     emit_process.stdin.write headersInput
     emit_process.stdin.end()
@@ -159,7 +192,7 @@ module.exports =
     pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
     file = [pch_file_prefix, lang, "pch"].join '.'
     pch = path.join dir,file
-    std = atom.config.get "autocomplete-clang.std.#{lang}"
+    std = atom.config.get "autocomplete-clang.std #{lang}"
     args = ["-x#{lang}-header", "-Xclang", '-emit-pch', '-o', pch]
     args = args.concat ["-std=#{std}"] if std
     include_paths = atom.config.get "autocomplete-clang.includePaths"
