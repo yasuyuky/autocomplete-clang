@@ -1,3 +1,6 @@
+## 0.6.7
+* Fix emitPch command
+
 ## 0.6.6
 * Fix crash with insertion of punctuation / solve #39
 
