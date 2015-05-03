@@ -136,7 +136,7 @@ module.exports =
       'autocomplete:previous': =>
         getAutocompleteClangView(this)?.selectPreviousItemView()
       'autocomplete-clang:emit-pch': =>
-        @emitPch this
+        @emitPch atom.workspace.getActiveTextEditor()
 
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
