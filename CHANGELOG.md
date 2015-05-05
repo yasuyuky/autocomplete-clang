@@ -1,3 +1,6 @@
+## 0.6.9
+* Update menu cson
+
 ## 0.6.8
 * Update config settings / solve #44
 
