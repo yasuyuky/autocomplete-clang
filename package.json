@@ -3,7 +3,7 @@
   "main": "./lib/autocomplete-clang",
   "version": "0.6.8",
   "description": "autocomplete for C/C++/ObjC using clang",
-  "activationEvents": [],
+  "activationCommands": [],
   "repository": "https://github.com/yasuyuky/autocomplete-clang",
   "license": "MIT",
   "engines": {

@@ -1,5 +1,6 @@
 ## 0.6.9
 * Update menu cson
+* Update package.json
 
 ## 0.6.8
 * Update config settings / solve #44
