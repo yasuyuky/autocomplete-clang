@@ -1,3 +1,6 @@
+## 0.7.0
+* Stop using deprecated transaction API (inline preview feature was disabled)
+
 ## 0.6.9
 * Update menu cson
 * Update package.json
