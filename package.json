@@ -1,7 +1,7 @@
 {
   "name": "autocomplete-clang",
   "main": "./lib/autocomplete-clang",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "autocomplete for C/C++/ObjC using clang",
   "activationCommands": [],
   "repository": "https://github.com/yasuyuky/autocomplete-clang",
@@ -21,5 +21,4 @@
       }
     }
   }
-
 }
