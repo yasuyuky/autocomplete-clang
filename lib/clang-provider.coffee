@@ -1,5 +1,6 @@
-# Some of the clang related code from https://github.com/yasuyuky/autocomplete-clang
-# Copyright (c) 2014 Yasuyuki YAMADA under MIT license
+# autocomplete-plus provider code from https://github.com/benogle/autocomplete-clang
+# Copyright (c) 2015 Ben Ogle under MIT license
+# Clang related code from https://github.com/yasuyuky/autocomplete-clang
 
 {Point, Range, BufferedProcess, TextEditor, CompositeDisposable} = require 'atom'
 path = require 'path'
@@ -25,7 +26,6 @@ class ClangProvider
     prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
     symbolPosition = LanguageUtil.nearestSymbolPosition(editor, bufferPosition) ? bufferPosition
 
-    # console.log "'#{prefix}'", bufferPosition, language
     if language?
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
         @filterForPrefix(suggestions, prefix)
@@ -41,7 +41,7 @@ class ClangProvider
       allOutput = []
       stdout = (output) => allOutput.push(output)
       stderr = (output) => console.log output
-      exit = (output) => resolve(@handleCompletionResult(allOutput.join('\n')))
+      exit = (code) => resolve(@handleCompletionResult(allOutput.join('\n'),code))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8';
       bufferedProcess.process.stdin.write(editor.getText())
@@ -78,28 +78,26 @@ class ClangProvider
         suggestion.text = replacement
       suggestion
 
-  handleCompletionResult: (result) ->
+  handleCompletionResult: (result,returnCode) ->
+    if returnCode is not 0
+      return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     outputLines = result.trim().split '\n'
     completions = (@convertCompletionLine(s) for s, i in outputLines when i < 1000)
     (completion for completion in completions when completion?)
 
   buildClangArgs: (editor, row, column, language)->
-    # pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), language, "pch"].join '.'
+    pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), language, "pch"].join '.'
     args = ["-fsyntax-only", "-x#{language}", "-Xclang"]
-    location = "-:#{row + 1}:#{column + 1}"
+    location = "-:#{row + 1}:#{column + 2}"
     args.push("-code-completion-at=#{location}")
 
     pchPath = path.join(path.dirname(editor.getPath()), 'test.pch')
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
-    # std = atom.config.get "autocomplete-clang.std.#{language}"
-    # args = args.concat ["-std=#{std}"] if std
+    std = atom.config.get "autocomplete-clang.std.#{language}"
+    args = args.concat ["-std=#{std}"] if std
     args = args.concat("-I#{i}" for i in @includePaths)
     args.push("-")
     args
-
-
-
-
 
 LanguageUtil =
   getSourceScopeLang: (scopeSource, scopesArray) ->
