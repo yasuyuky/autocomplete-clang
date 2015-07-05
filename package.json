@@ -13,5 +13,13 @@
     "atom-space-pen-views": "^0.20.0",
     "underscore-plus": "1.x",
     "clang-flags": "0.2.2"
+  },
+  "providedServices": {
+    "autocomplete.provider": {
+      "versions": {
+        "2.0.0": "provide"
+      }
+    }
   }
+
 }

@@ -1,9 +1,8 @@
-AutocompleteClangView = require './autocomplete-clang-view'
 util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
-_ = require 'underscore-plus'
 {CompositeDisposable,Disposable} = require 'atom'
+ClangProvider = null
 
 module.exports =
   config:
@@ -137,37 +136,11 @@ module.exports =
       items:
         type: 'string'
 
-  autocompleteClangViewsByEditor: null
   deactivationDisposables: null
 
   activate: (state) ->
-    @autocompleteClangViewsByEditor = new WeakMap
-    getAutocompleteClangView = (editorElement) =>
-      @autocompleteClangViewsByEditor.get(editorElement.getModel())
-
     @deactivationDisposables = new CompositeDisposable
-
-    @deactivationDisposables.add atom.workspace.observeTextEditors (editor) =>
-      return if editor.mini
-
-      autocompleteClangView = new AutocompleteClangView(editor)
-      @autocompleteClangViewsByEditor.set(editor, autocompleteClangView)
-
-      disposable = new Disposable -> autocompleteClangView.remove()
-      @deactivationDisposables.add editor.onDidDestroy -> disposable.dispose()
-      @deactivationDisposables.add disposable
-
-      @deactivationDisposables.add editor.onDidInsertText (e) ->
-        if atom.config.get 'autocomplete-clang.enableAutoToggle'
-          autocompleteClangView?.handleTextInsertion(e)
-
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
-      'autocomplete-clang:toggle': ->
-        getAutocompleteClangView(this)?.toggle()
-      'autocomplete:next': =>
-        getAutocompleteClangView(this)?.selectNextItemView()
-      'autocomplete:previous': =>
-        getAutocompleteClangView(this)?.selectPreviousItemView()
       'autocomplete-clang:emit-pch': =>
         @emitPch atom.workspace.getActiveTextEditor()
 
@@ -210,3 +183,7 @@ module.exports =
   deactivate: ->
     @deactivationDisposables.dispose()
     console.log "autocomplete-clang deactivated"
+
+  provide: ->
+    ClangProvider ?= require('./clang-provider')
+    new ClangProvider()
