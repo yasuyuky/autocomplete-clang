@@ -3,6 +3,8 @@
 This package provides completions by [clang](http://clang.llvm.org/)
 like [emacs auto-complete-clang.el](https://github.com/brianjcj/auto-complete-clang).
 
+using [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
+
 **for `C`/`C++`/`Objective-C`**
 
 ![Screenshot for how autocomplete works](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang.gif)
@@ -11,6 +13,7 @@ This package is currently in an experimental state.
 
 ## Requirement
 
+- [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
 - **[clang](http://clang.llvm.org/)**
 
 
