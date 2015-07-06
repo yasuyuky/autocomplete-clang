@@ -1,3 +1,7 @@
+## 0.8.2
+* Reintroduce "symbol position" with better symbol regex
+* Use rightLabel instead of label
+
 ## 0.8.1
 * Stop using symbol position to better completions
 
