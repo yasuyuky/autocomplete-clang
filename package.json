@@ -7,11 +7,9 @@
   "repository": "https://github.com/yasuyuky/autocomplete-clang",
   "license": "MIT",
   "engines": {
-    "atom": ">=0.149.0"
+    "atom": "^1.0.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^0.20.0",
-    "underscore-plus": "1.x",
     "clang-flags": "0.2.2"
   },
   "providedServices": {
