@@ -24,7 +24,8 @@ class ClangProvider
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->
     language = LanguageUtil.getSourceScopeLang(@scopeSource, scopeDescriptor.getScopesArray())
     prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
-    symbolPosition = LanguageUtil.nearestSymbolPosition(editor, bufferPosition) ? bufferPosition
+    [symbolPosition,lastSymbol] = LanguageUtil.nearestSymbolPosition(editor, bufferPosition)
+    return if lastSymbol == ';'
 
     if language?
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
@@ -117,4 +118,6 @@ LanguageUtil =
     if matches
       symbol = matches[1]
       symbolColumn = matches[0].indexOf(symbol) + symbol.length + (line.length - matches[0].length)
-      new Point(bufferPosition.row, symbolColumn)
+      [new Point(bufferPosition.row, symbolColumn),symbol[-1..]]
+    else
+      [bufferPosition,'']

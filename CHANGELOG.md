@@ -1,3 +1,6 @@
+## 0.8.3
+* Improve behavior with semicolon
+
 ## 0.8.2
 * Reintroduce "symbol position" with better symbol regex
 * Use rightLabel instead of label
