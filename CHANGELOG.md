@@ -1,3 +1,6 @@
+## 0.8.5
+* Relax the limit of clang outputs
+
 ## 0.8.4
 * Reintroduce config settings
 

@@ -81,7 +81,7 @@ class ClangProvider
     if returnCode is not 0
       return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     outputLines = result.trim().split '\n'
-    completions = (@convertCompletionLine(s) for s, i in outputLines when i < 1000)
+    completions = (@convertCompletionLine(s) for s in outputLines)
     (completion for completion in completions when completion?)
 
   buildClangArgs: (editor, row, column, language)->
