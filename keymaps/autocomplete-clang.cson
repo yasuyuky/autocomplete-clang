@@ -8,5 +8,4 @@
 # For more detailed documentation see
 # https://atom.io/docs/latest/advanced/keymaps
 'atom-workspace':
-  'ctrl-alt-/': 'autocomplete-clang:toggle'
   'cmd-ctrl-alt-e': 'autocomplete-clang:emit-pch'

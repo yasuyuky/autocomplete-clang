@@ -18,14 +18,6 @@ module.exports =
     pchFilePrefix:
       type: 'string'
       default: '.stdafx'
-    enableAutoToggle:
-      type: 'boolean'
-      default: true
-    autoToggleKeys:
-      type: 'array'
-      default: [".","#","::","->"]
-      items:
-        type: 'string'
     ignoreClangErrors:
       type: 'boolean'
       default: true

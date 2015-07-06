@@ -5,15 +5,13 @@
 {Point, Range, BufferedProcess, TextEditor, CompositeDisposable} = require 'atom'
 path = require 'path'
 {existsSync} = require 'fs'
+ClangFlags = require 'clang-flags'
 
 module.exports =
 class ClangProvider
   selector: '.source.cpp, .source.c, .source.objc, .source.objcpp'
   inclusionPriority: 1
   excludeLowerPriority: true
-
-  clangCommand: "clang"
-  includePaths: [".", ".."]
 
   scopeSource:
     'source.cpp': 'c++'
@@ -32,7 +30,7 @@ class ClangProvider
         @filterForPrefix(suggestions, prefix)
 
   codeCompletionAt: (editor, row, column, language) ->
-    command = @clangCommand
+    command = atom.config.get "autocomplete-clang.clangCommand"
     args = @buildClangArgs(editor, row, column, language)
     options =
       cwd: path.dirname(editor.getPath())
@@ -96,7 +94,12 @@ class ClangProvider
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
     std = atom.config.get "autocomplete-clang.std.#{language}"
     args = args.concat ["-std=#{std}"] if std
-    args = args.concat("-I#{i}" for i in @includePaths)
+    args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
+    try
+      clangflags = ClangFlags.getClangFlags(editor.getPath())
+      args = args.concat clangflags if clangflags
+    catch error
+      console.log error
     args.push("-")
     args
 
