@@ -1,3 +1,6 @@
+## 0.8.1
+* Stop using symbol position to better completions
+
 ## 0.8.0
 * Start working with [autocomplete-plus](https://github.com/atom/autocomplete-plus)!
   Most of provider code from https://github.com/benogle/autocomplete-clang
