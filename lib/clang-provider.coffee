@@ -13,7 +13,6 @@ class ClangProvider
   excludeLowerPriority: true
 
   clangCommand: "clang"
-  includePaths: [".", ".."]
 
   scopeSource:
     'source.cpp': 'c++'
@@ -96,7 +95,8 @@ class ClangProvider
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
     std = atom.config.get "autocomplete-clang.std.#{language}"
     args = args.concat ["-std=#{std}"] if std
-    args = args.concat("-I#{i}" for i in @includePaths)
+    args = args.concat("-I#{i}" for i in atom.config.get("autocomplete-clang.includePaths"))
+    args = args.concat("#{i}" for i in atom.config.get("autocomplete-clang.clangArgs"))
     args.push("-")
     args
 

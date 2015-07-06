@@ -15,6 +15,11 @@ module.exports =
       default: ['.']
       items:
         type: 'string'
+    clangArgs:
+      type: 'array'
+      default: []
+      items:
+        type: 'string'
     pchFilePrefix:
       type: 'string'
       default: '.stdafx'
