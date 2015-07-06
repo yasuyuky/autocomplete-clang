@@ -24,9 +24,10 @@ class ClangProvider
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->
     language = LanguageUtil.getSourceScopeLang(@scopeSource, scopeDescriptor.getScopesArray())
     prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
+    symbolPosition = LanguageUtil.nearestSymbolPosition(editor, bufferPosition) ? bufferPosition
 
     if language?
-      @codeCompletionAt(editor, bufferPosition.row, bufferPosition.column, language).then (suggestions) =>
+      @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
         @filterForPrefix(suggestions, prefix)
 
   codeCompletionAt: (editor, row, column, language) ->
@@ -108,3 +109,12 @@ LanguageUtil =
     regex = /[\w0-9_-]+$/ # whatever your prefix regex might be
     line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
     line.match(regex)?[0] or ''
+
+  nearestSymbolPosition: (editor, bufferPosition) ->
+    regex = /([^\w0-9_]+)[\w0-9_]*$/
+    line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
+    matches = line.match(regex)
+    if matches
+      symbol = matches[1]
+      symbolColumn = matches[0].indexOf(symbol) + symbol.length + (line.length - matches[0].length)
+      new Point(bufferPosition.row, symbolColumn)
