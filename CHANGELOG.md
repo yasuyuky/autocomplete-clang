@@ -1,3 +1,6 @@
+## 0.8.6
+* Add -code-completion-macros argument to enable macro completion
+
 ## 0.8.5
 * Relax the limit of clang outputs
 
