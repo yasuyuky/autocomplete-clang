@@ -86,7 +86,7 @@ class ClangProvider
 
   buildClangArgs: (editor, row, column, language)->
     pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), language, "pch"].join '.'
-    args = ["-fsyntax-only", "-x#{language}", "-Xclang"]
+    args = ["-fsyntax-only", "-x#{language}", "-Xclang", "-code-completion-macros", "-Xclang"]
     location = "-:#{row + 1}:#{column + 1}"
     args.push("-code-completion-at=#{location}")
 
