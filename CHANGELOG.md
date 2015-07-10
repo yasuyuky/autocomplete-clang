@@ -1,3 +1,7 @@
+## 0.8.7
+* Remove the word 'returns' from right label
+* Improve completions to include completions without patterns
+
 ## 0.8.6
 * Add -code-completion-macros argument to enable macro completion
 
