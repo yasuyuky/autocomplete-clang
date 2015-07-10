@@ -70,7 +70,8 @@ class ClangProvider
         index++
         "${#{index}:#{arg}}"
 
-      suggestion = {rightLabel: "returns #{returnType}"}
+      suggestion = {}
+      suggestion.rightLabel = returnType if returnType?
       if index > 0
         suggestion.snippet = replacement
       else
