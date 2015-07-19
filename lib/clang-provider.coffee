@@ -78,6 +78,8 @@ class ClangProvider
         suggestion.snippet = replacement
       else
         suggestion.text = replacement
+      if suggestion.snippet
+        suggestion.snippet += ";$0"
       suggestion
 
   handleCompletionResult: (result,returnCode) ->
