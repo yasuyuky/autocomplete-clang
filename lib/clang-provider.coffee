@@ -57,14 +57,16 @@ class ClangProvider
   lineRe: /COMPLETION: ([^:]+)(?: : (.+))?$/
   returnTypeRe: /\[#([^#]+)#\]/ig
   argumentRe: /\<#([^#]+)#\>/ig
+  commentSplitRe: /(?: : (.+))?$/
   convertCompletionLine: (s) ->
     match = s.match(@lineRe)
     if match?
       [line, completion, pattern] = match
       unless pattern?
         return {snippet:completion,text:completion}
+      [patternNoComment, briefComment] = pattern.split @commentSplitRe
       returnType = null
-      patternNoType = pattern.replace @returnTypeRe, (match, type) ->
+      patternNoType = patternNoComment.replace @returnTypeRe, (match, type) ->
         returnType = type
         ''
       index = 0
@@ -78,6 +80,7 @@ class ClangProvider
         suggestion.snippet = replacement
       else
         suggestion.text = replacement
+      suggestion.description = briefComment if briefComment?
       suggestion
 
   handleCompletionResult: (result,returnCode) ->
@@ -92,6 +95,10 @@ class ClangProvider
     args = ["-fsyntax-only", "-x#{language}", "-Xclang", "-code-completion-macros", "-Xclang"]
     location = "-:#{row + 1}:#{column + 1}"
     args.push("-code-completion-at=#{location}")
+
+    if atom.config.get("autocomplete-clang.includeDocumentation")?
+      args = args.concat ["-Xclang", "-code-completion-brief-comments"]
+      args.push("-fparse-all-comments") if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
 
     pchPath = path.join(path.dirname(editor.getPath()), 'test.pch')
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
