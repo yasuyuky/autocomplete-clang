@@ -102,7 +102,7 @@ class ClangProvider
 
     pchPath = path.join(path.dirname(editor.getPath()), 'test.pch')
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
-    std = atom.config.get "autocomplete-clang.std.#{language}"
+    std = atom.config.get "autocomplete-clang.std #{language}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
     try
