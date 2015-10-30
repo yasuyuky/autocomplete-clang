@@ -21,6 +21,12 @@ module.exports =
     ignoreClangErrors:
       type: 'boolean'
       default: true
+    includeDocumentation:
+      type: 'boolean'
+      default: true
+    includeNonDoxygenCommentsAsDocumentation:
+      type: 'boolean'
+      default: false
     "std c++":
       type: 'string'
       default: "c++11"
