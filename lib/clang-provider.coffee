@@ -22,8 +22,11 @@ class ClangProvider
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->
     language = LanguageUtil.getSourceScopeLang(@scopeSource, scopeDescriptor.getScopesArray())
     prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
+
+    minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength')
+    return if minimumWordLength and prefix.trim().length < minimumWordLength
+
     [symbolPosition,lastSymbol] = LanguageUtil.nearestSymbolPosition(editor, bufferPosition)
-    return if lastSymbol == ';'
 
     if language?
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
