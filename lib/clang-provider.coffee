@@ -100,11 +100,13 @@ class ClangProvider
       args = args.concat ["-Xclang", "-code-completion-brief-comments"]
       args.push("-fparse-all-comments") if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
 
-    pchPath = path.join(path.dirname(editor.getPath()), 'test.pch')
+    currentDir=path.dirname(editor.getPath())
+    pchPath = path.join(currentDir, 'test.pch')
     args = args.concat ["-include-pch", pchPath] if existsSync pchPath
     std = atom.config.get "autocomplete-clang.std #{language}"
     args = args.concat ["-std=#{std}"] if std
     args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
+    args.push("-I#{currentDir}")
     try
       clangflags = ClangFlags.getClangFlags(editor.getPath())
       args = args.concat clangflags if clangflags
