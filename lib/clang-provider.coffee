@@ -25,8 +25,8 @@ class ClangProvider
     [symbolPosition,lastSymbol] = LanguageUtil.nearestSymbolPosition(editor, bufferPosition)
     minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength')
 
-    if minimumWordLength? and lastSymbol != '.' and lastSymbol != '>'
-      return if prefix.length < minimumWordLength
+    if minimumWordLength? and prefix.length < minimumWordLength
+      return unless LanguageUtil.afterMemberAccessOperator(editor, bufferPosition)
 
     if language?
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
@@ -137,3 +137,8 @@ LanguageUtil =
       [new Point(bufferPosition.row, symbolColumn),symbol[-1..]]
     else
       [bufferPosition,'']
+
+  afterMemberAccessOperator: (editor, bufferPosition) ->
+    regex = /(?:\.|->)\s*\w*$/
+    line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
+    regex.test(line)
