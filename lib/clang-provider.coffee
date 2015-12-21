@@ -23,7 +23,12 @@ class ClangProvider
     language = LanguageUtil.getSourceScopeLang(@scopeSource, scopeDescriptor.getScopesArray())
     prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
     [symbolPosition,lastSymbol] = LanguageUtil.nearestSymbolPosition(editor, bufferPosition)
-    return if lastSymbol == ';'
+    minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength')
+
+    if minimumWordLength? and prefix.length < minimumWordLength
+      regex = /(?:\.|->|::)\s*\w*$/
+      line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
+      return unless regex.test(line)
 
     if language?
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
@@ -120,12 +125,12 @@ LanguageUtil =
     null
 
   prefixAtPosition: (editor, bufferPosition) ->
-    regex = /[\w0-9_-]+$/ # whatever your prefix regex might be
+    regex = /\w+$/
     line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
     line.match(regex)?[0] or ''
 
   nearestSymbolPosition: (editor, bufferPosition) ->
-    regex = /([^\w0-9_]+)[\w0-9_]*$/
+    regex = /(\W+)\w*$/
     line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
     matches = line.match(regex)
     if matches
