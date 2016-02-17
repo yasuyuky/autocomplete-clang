@@ -71,8 +71,6 @@ module.exports =
       alert "autocomplete-clang:go-defintion\nError: Incompatible Language"
       return
     command = atom.config.get "autocomplete-clang.clangCommand"
-    langUtil = require("./clang-provider").LanguageUtil
-
     editor.selectWordsContainingCursors();
     term = editor.getSelectedText()
     p = editor.getDirectoryPath()
@@ -113,8 +111,8 @@ module.exports =
     args = ["-x#{lang}-header", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
     args = args.concat ["#{term}"]
     args = args.concat ["-std=#{std}"] if std
-    include_paths = atom.config.get "autocomplete-clang.includePaths"
-    args = args.concat (include_paths)
+    include_paths = atom.config.get("autocomplete-clang.includePaths")
+    args = args.concat ("-I#{i}" for i in include_paths)
     args = args.concat ["-"]
     return args
 
@@ -147,8 +145,10 @@ module.exports =
     linematch = m[2] if m and m.length > 2
     colmatch  = m[3] if m and m.length > 3
     p = result['path'] + '/'
+    if filematch.startsWith("./")
+      filematch = p + filematch
     if filematch != "line"
-      atom.workspace.open(p + filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
+      atom.workspace.open(filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
 
   handleEmitPchResult: (code)->
     unless code
