@@ -1,7 +1,7 @@
 util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
-{CompositeDisposable,Disposable,BufferedProcess,Selection} = require 'atom'
+{CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
 ClangProvider = null
 defaultPrecompiled = require './defaultPrecompiled'
 
@@ -62,19 +62,19 @@ module.exports =
       'autocomplete-clang:emit-pch': =>
         @emitPch atom.workspace.getActiveTextEditor()
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
-      'autocomplete-clang:go-definition': => @goDefinition atom.workspace.getActiveTextEditor()
+      'autocomplete-clang:go-declaration': => @goDeclaration atom.workspace.getActiveTextEditor()
 
 
-  goDefinition: (editor)->
+  goDeclaration: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
     unless lang
-      alert "autocomplete-clang:go-defintion\nError: Incompatible Language"
+      alert "autocomplete-clang:go-declaration\nError: Incompatible Language"
       return
     command = atom.config.get "autocomplete-clang.clangCommand"
     editor.selectWordsContainingCursors();
     term = editor.getSelectedText()
     p = editor.getDirectoryPath()
-    args = @buildGoDefinitionCommandArgs(editor,lang,term)
+    args = @buildGoDeclarationCommandArgs(editor,lang,term)
     options =
       cwd: path.dirname(editor.getPath())
       input: editor.getText()
@@ -83,7 +83,7 @@ module.exports =
       stdout = (output) => allOutput.push(output)
       stderr = (output) => console.log output
       exit = (code) =>
-        resolve(@handleGoDefinitionResult({output:allOutput.join("\n"),term:term, path:p }, code))
+        resolve(@handleGoDeclarationResult({output:allOutput.join("\n"),term:term, path:p }, code))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8';
       bufferedProcess.process.stdin.write(editor.getText())
@@ -106,7 +106,7 @@ module.exports =
     emit_process.stdin.write headersInput
     emit_process.stdin.end()
 
-  buildGoDefinitionCommandArgs: (editor,lang,term)->
+  buildGoDeclarationCommandArgs: (editor,lang,term)->
     std = atom.config.get "autocomplete-clang.std #{lang}"
     args = ["-x#{lang}-header", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
     args = args.concat ["#{term}"]
@@ -129,7 +129,7 @@ module.exports =
     args = args.concat ["-"]
     return args
 
-  handleGoDefinitionResult: (result,returnCode)->
+  handleGoDeclarationResult: (result,returnCode)->
     if returnCode is not 0
         return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     outputLines = result['output']
@@ -147,8 +147,10 @@ module.exports =
     p = result['path'] + '/'
     if filematch.startsWith("./")
       filematch = p + filematch
-    if filematch != "line"
-      atom.workspace.open(filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
+    f = new File filematch
+    f.exists().then (result) ->
+      if result
+        atom.workspace.open(filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
 
   handleEmitPchResult: (code)->
     unless code
