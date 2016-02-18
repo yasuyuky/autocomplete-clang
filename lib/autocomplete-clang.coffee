@@ -135,9 +135,9 @@ module.exports =
     outputLines = result['output']
     t = result['term']
     baseregex = ///\w+Decl[^<]+<(?!col:)(..[^:,]+):?(\d+):?\d+?.*?col:(\d+).*?\s#{t}\s///
-    classregex = ///.*CXXRecordDecl[^<]+<([^:,]+):(\d+):(\d+).*?#{t}\ definition.*///
+    classregex = ///\w+Decl[^<]+<([^:,]+):(\d+):(\d+).*?#{t}/// #works for class and enum types
     m = outputLines.match(baseregex)
-    if m and m.length > 1 and m[1].trim() is "line"
+    if (m and m.length > 1 and m[1].trim() is "line") or m is null
       m = outputLines.match(classregex)
     if m == null
       return
