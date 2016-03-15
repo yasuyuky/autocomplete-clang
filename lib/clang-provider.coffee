@@ -2,7 +2,7 @@
 # Copyright (c) 2015 Ben Ogle under MIT license
 # Clang related code from https://github.com/yasuyuky/autocomplete-clang
 
-{Point, Range, BufferedProcess, TextEditor, CompositeDisposable} = require 'atom'
+{Point, Range, BufferedProcess, CompositeDisposable} = require 'atom'
 path = require 'path'
 {existsSync} = require 'fs'
 ClangFlags = require 'clang-flags'
