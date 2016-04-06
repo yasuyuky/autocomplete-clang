@@ -95,29 +95,29 @@ class ClangProvider
     completions = (@convertCompletionLine(s) for s in outputLines)
     (completion for completion in completions when completion?)
 
-  buildClangArgs: (editor, row, column, language)->
+  buildClangArgs: (editor, row, column, language) ->
     pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), language, "pch"].join '.'
-    args = ["-fsyntax-only", "-x#{language}", "-Xclang", "-code-completion-macros", "-Xclang"]
+    args = ["-fsyntax-only", "-x#{language}", "-Xclang", "-code-completion-macros"]
     location = "-:#{row + 1}:#{column + 1}"
-    args.push("-code-completion-at=#{location}")
+    args.push "-Xclang", "-code-completion-at=#{location}"
 
     if atom.config.get("autocomplete-clang.includeDocumentation")?
-      args = args.concat ["-Xclang", "-code-completion-brief-comments"]
-      args.push("-fparse-all-comments") if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
+      args.push "-Xclang", "-code-completion-brief-comments"
+      args.push "-fparse-all-comments" if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
 
-    currentDir=path.dirname(editor.getPath())
+    currentDir = path.dirname(editor.getPath())
     pchPath = path.join(currentDir, 'test.pch')
-    args = args.concat ["-include-pch", pchPath] if existsSync pchPath
+    args.push "-include-pch", pchPath if existsSync pchPath
     std = atom.config.get "autocomplete-clang.std #{language}"
-    args = args.concat ["-std=#{std}"] if std
-    args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
-    args.push("-I#{currentDir}")
+    args.push "-std=#{std}" if std
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{currentDir}"
     try
       clangflags = ClangFlags.getClangFlags(editor.getPath())
       args = args.concat clangflags if clangflags
     catch error
       console.log error
-    args.push("-")
+    args.push "-"
     args
 
 LanguageUtil =
