@@ -101,7 +101,7 @@ class ClangProvider
     location = "-:#{row + 1}:#{column + 1}"
     args.push "-Xclang", "-code-completion-at=#{location}"
 
-    if atom.config.get("autocomplete-clang.includeDocumentation")?
+    if atom.config.get("autocomplete-clang.includeDocumentation")
       args.push "-Xclang", "-code-completion-brief-comments"
       args.push "-fparse-all-comments" if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
 
