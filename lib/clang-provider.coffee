@@ -74,6 +74,8 @@ class ClangProvider
     [completion, comment] = completionAndComment.split commentRe
     returnTypeRe = /^\[#(.*?)#\]/
     returnType = completion.match(returnTypeRe)?[1]
+    constMemFuncRe = /\[# const#\]$/
+    isConstMemFunc = constMemFuncRe.test completion
     infoTagsRe = /\[#(.*?)#\]/g
     completion = completion.replace infoTagsRe, ''
     argumentsRe = /<#(.*?)#>/g
@@ -88,6 +90,8 @@ class ClangProvider
       suggestion.snippet = completion
     else
       suggestion.text = completion
+    if isConstMemFunc
+      suggestion.displayText = completion + ' const'
     suggestion.description = comment if comment?
     suggestion
 
