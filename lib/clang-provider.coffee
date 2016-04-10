@@ -59,33 +59,34 @@ class ClangProvider
         res.push(suggestion)
     res
 
-  lineRe: /COMPLETION: ([^:]+)(?: : (.+))?$/
-  returnTypeRe: /^\[#([^#]*)#\]/
-  infoTagsRe: /\[#([^#]*)#\]/g
-  argumentRe: /\<#([^#]+)#\>/ig
-  commentSplitRe: /(?: : (.+))?$/
   convertCompletionLine: (s) ->
-    match = s.match(@lineRe)
-    if match?
-      [line, completion, pattern] = match
-      unless pattern?
-        return {snippet:completion,text:completion}
-      [patternNoComment, briefComment] = pattern.split @commentSplitRe
-      returnType = patternNoComment.match(@returnTypeRe)?[1]
-      patternNoType = patternNoComment.replace @infoTagsRe, ''
-      index = 0
-      replacement = patternNoType.replace @argumentRe, (match, arg) ->
-        index++
-        "${#{index}:#{arg}}"
+    lineRe = /COMPLETION: ([^:]+)(?: : (.+))?$/
+    match = s.match lineRe
+    return unless match?
 
-      suggestion = {}
-      suggestion.leftLabel = returnType if returnType?
-      if index > 0
-        suggestion.snippet = replacement
-      else
-        suggestion.text = replacement
-      suggestion.description = briefComment if briefComment?
-      suggestion
+    [line, basicInfo, completionAndComment] = match
+    return {text: basicInfo} unless completionAndComment?
+
+    commentRe = /(?: : (.*))?$/
+    [completion, comment] = completionAndComment.split commentRe
+    returnTypeRe = /^\[#([^#]*)#\]/
+    returnType = completion.match(returnTypeRe)?[1]
+    infoTagsRe = /\[#([^#]*)#\]/g
+    completion = completion.replace infoTagsRe, ''
+    argumentsRe = /\<#([^#]*)#\>/g
+    index = 0
+    completion = completion.replace argumentsRe, (match, arg) ->
+      index++
+      "${#{index}:#{arg}}"
+
+    suggestion = {}
+    suggestion.leftLabel = returnType if returnType?
+    if index > 0
+      suggestion.snippet = completion
+    else
+      suggestion.text = completion
+    suggestion.description = comment if comment?
+    suggestion
 
   handleCompletionResult: (result,returnCode) ->
     if returnCode is not 0
