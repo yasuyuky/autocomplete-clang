@@ -60,7 +60,8 @@ class ClangProvider
     res
 
   lineRe: /COMPLETION: ([^:]+)(?: : (.+))?$/
-  returnTypeRe: /\[#([^#]+)#\]/ig
+  returnTypeRe: /^\[#([^#]*)#\]/
+  infoTagsRe: /\[#([^#]*)#\]/g
   argumentRe: /\<#([^#]+)#\>/ig
   commentSplitRe: /(?: : (.+))?$/
   convertCompletionLine: (s) ->
@@ -70,10 +71,8 @@ class ClangProvider
       unless pattern?
         return {snippet:completion,text:completion}
       [patternNoComment, briefComment] = pattern.split @commentSplitRe
-      returnType = null
-      patternNoType = patternNoComment.replace @returnTypeRe, (match, type) ->
-        returnType = type
-        ''
+      returnType = patternNoComment.match(@returnTypeRe)?[1]
+      patternNoType = patternNoComment.replace @infoTagsRe, ''
       index = 0
       replacement = patternNoType.replace @argumentRe, (match, arg) ->
         index++
