@@ -80,7 +80,7 @@ class ClangProvider
         "${#{index}:#{arg}}"
 
       suggestion = {}
-      suggestion.rightLabel = returnType if returnType?
+      suggestion.leftLabel = returnType if returnType?
       if index > 0
         suggestion.snippet = replacement
       else
