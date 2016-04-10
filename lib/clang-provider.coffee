@@ -59,21 +59,24 @@ class ClangProvider
         res.push(suggestion)
     res
 
-  convertCompletionLine: (s) ->
-    lineRe = /COMPLETION: ([^:]+)(?: : (.+))?$/
-    match = s.match lineRe
+  convertCompletionLine: (line) ->
+    contentRe = /^COMPLETION: (.*)/
+    match = line.match contentRe
     return unless match?
 
-    [line, basicInfo, completionAndComment] = match
-    return {text: basicInfo} unless completionAndComment?
+    [line, content] = match
+    basicInfoRe = /^(.*?) : (.*)/
+    match = content.match basicInfoRe
+    return {text: content} unless match?
 
+    [content, basicInfo, completionAndComment] = match
     commentRe = /(?: : (.*))?$/
     [completion, comment] = completionAndComment.split commentRe
-    returnTypeRe = /^\[#([^#]*)#\]/
+    returnTypeRe = /^\[#(.*?)#\]/
     returnType = completion.match(returnTypeRe)?[1]
-    infoTagsRe = /\[#([^#]*)#\]/g
+    infoTagsRe = /\[#(.*?)#\]/g
     completion = completion.replace infoTagsRe, ''
-    argumentsRe = /\<#([^#]*)#\>/g
+    argumentsRe = /<#(.*?)#>/g
     index = 0
     completion = completion.replace argumentsRe, (match, arg) ->
       index++
