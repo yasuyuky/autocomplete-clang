@@ -59,34 +59,41 @@ class ClangProvider
         res.push(suggestion)
     res
 
-  lineRe: /COMPLETION: ([^:]+)(?: : (.+))?$/
-  returnTypeRe: /\[#([^#]+)#\]/ig
-  argumentRe: /\<#([^#]+)#\>/ig
-  commentSplitRe: /(?: : (.+))?$/
-  convertCompletionLine: (s) ->
-    match = s.match(@lineRe)
-    if match?
-      [line, completion, pattern] = match
-      unless pattern?
-        return {snippet:completion,text:completion}
-      [patternNoComment, briefComment] = pattern.split @commentSplitRe
-      returnType = null
-      patternNoType = patternNoComment.replace @returnTypeRe, (match, type) ->
-        returnType = type
-        ''
-      index = 0
-      replacement = patternNoType.replace @argumentRe, (match, arg) ->
-        index++
-        "${#{index}:#{arg}}"
+  convertCompletionLine: (line) ->
+    contentRe = /^COMPLETION: (.*)/
+    match = line.match contentRe
+    return unless match?
 
-      suggestion = {}
-      suggestion.rightLabel = returnType if returnType?
-      if index > 0
-        suggestion.snippet = replacement
-      else
-        suggestion.text = replacement
-      suggestion.description = briefComment if briefComment?
-      suggestion
+    [line, content] = match
+    basicInfoRe = /^(.*?) : (.*)/
+    match = content.match basicInfoRe
+    return {text: content} unless match?
+
+    [content, basicInfo, completionAndComment] = match
+    commentRe = /(?: : (.*))?$/
+    [completion, comment] = completionAndComment.split commentRe
+    returnTypeRe = /^\[#(.*?)#\]/
+    returnType = completion.match(returnTypeRe)?[1]
+    constMemFuncRe = /\[# const#\]$/
+    isConstMemFunc = constMemFuncRe.test completion
+    infoTagsRe = /\[#(.*?)#\]/g
+    completion = completion.replace infoTagsRe, ''
+    argumentsRe = /<#(.*?)#>/g
+    index = 0
+    completion = completion.replace argumentsRe, (match, arg) ->
+      index++
+      "${#{index}:#{arg}}"
+
+    suggestion = {}
+    suggestion.leftLabel = returnType if returnType?
+    if index > 0
+      suggestion.snippet = completion
+    else
+      suggestion.text = completion
+    if isConstMemFunc
+      suggestion.displayText = completion + ' const'
+    suggestion.description = comment if comment?
+    suggestion
 
   handleCompletionResult: (result,returnCode) ->
     if returnCode is not 0
