@@ -10,7 +10,8 @@
     "atom": "^1.0.0"
   },
   "dependencies": {
-    "clang-flags": "0.2.2"
+    "clang-flags": "0.2.2",
+    "atom-space-pen-views": "^2.0.0"
   },
   "providedServices": {
     "autocomplete.provider": {
