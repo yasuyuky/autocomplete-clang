@@ -2,6 +2,8 @@ util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
 {CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
+LocationSelectList = require './location-select-view.coffee'
+
 ClangProvider = null
 defaultPrecompiled = require './defaultPrecompiled'
 
@@ -62,18 +64,16 @@ module.exports =
       'autocomplete-clang:emit-pch': =>
         @emitPch atom.workspace.getActiveTextEditor()
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
-      'autocomplete-clang:go-declaration': => @goDeclaration atom.workspace.getActiveTextEditor()
+      'autocomplete-clang:go-declaration': (e)=> @goDeclaration atom.workspace.getActiveTextEditor(),e
 
-
-  goDeclaration: (editor)->
+  goDeclaration: (editor,e)->
     lang = util.getFirstCursorSourceScopeLang editor
     unless lang
-      alert "autocomplete-clang:go-declaration\nError: Incompatible Language"
+      e.abortKeyBinding()
       return
     command = atom.config.get "autocomplete-clang.clangCommand"
     editor.selectWordsContainingCursors();
     term = editor.getSelectedText()
-    p = editor.getDirectoryPath()
     args = @buildGoDeclarationCommandArgs(editor,lang,term)
     options =
       cwd: path.dirname(editor.getPath())
@@ -83,12 +83,11 @@ module.exports =
       stdout = (output) => allOutput.push(output)
       stderr = (output) => console.log output
       exit = (code) =>
-        resolve(@handleGoDeclarationResult({output:allOutput.join("\n"),term:term, path:p }, code))
+        resolve(@handleGoDeclarationResult(editor, {output:allOutput.join("\n"),term:term}, code))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8';
       bufferedProcess.process.stdin.write(editor.getText())
       bufferedProcess.process.stdin.end()
-
 
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
@@ -108,7 +107,7 @@ module.exports =
 
   buildGoDeclarationCommandArgs: (editor,lang,term)->
     std = atom.config.get "autocomplete-clang.std #{lang}"
-    args = ["-x#{lang}-header", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
+    args = ["-x#{lang}", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
     args = args.concat ["#{term}"]
     args = args.concat ["-std=#{std}"] if std
     include_paths = atom.config.get("autocomplete-clang.includePaths")
@@ -129,28 +128,44 @@ module.exports =
     args = args.concat ["-"]
     return args
 
-  handleGoDeclarationResult: (result,returnCode)->
+  handleGoDeclarationResult: (editor, result, returnCode)->
     if returnCode is not 0
-        return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
-    outputLines = result['output']
-    t = result['term']
-    baseregex = ///\w+Decl[^<]+<(?!col:)(..[^:,]+):?(\d+):?\d+?.*?col:(\d+).*?\s#{t}\s///
-    classregex = ///\w+Decl[^<]+<([^:,]+):(\d+):(\d+).*?#{t}/// #works for class and enum types
-    m = outputLines.match(baseregex)
-    if (m and m.length > 1 and m[1].trim() is "line") or m is null
-      m = outputLines.match(classregex)
-    if m == null
-      return
-    filematch = m[1] if m and m.length > 1
-    linematch = m[2] if m and m.length > 2
-    colmatch  = m[3] if m and m.length > 3
-    p = result['path'] + '/'
-    if filematch.startsWith("./")
-      filematch = p + filematch
-    f = new File filematch
+      return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
+    places = @parseAstDump result['output'], result['term']
+    if places.length is 1
+        @goToLocation editor, places.pop()
+    else if places.length > 1
+        list = new LocationSelectList(editor, @goToLocation)
+        list.setItems(places)
+
+  goToLocation: (editor, [file,line,col]) ->
+    if file is '<stdin>'
+      return editor.setCursorBufferPosition [line-1,col-1]
+    file = path.join editor.getDirectoryPath(), file if file.startsWith(".")
+    f = new File file
     f.exists().then (result) ->
-      if result
-        atom.workspace.open(filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
+      atom.workspace.open file, {initialLine:line-1, initialColumn:col-1} if result
+
+  parseAstDump: (aststring, term)->
+    candidates = aststring.split '\n\n'
+    places = []
+    for candidate in candidates
+      match = candidate.match ///^Dumping\s(?:[A-Za-z_]*::)*?#{term}:///
+      if match isnt null
+        lines = candidate.split '\n'
+        continue if lines.length < 2
+        declTerms = lines[1].split ' '
+        [_,_,declRangeStr,_,posStr,...] = declTerms
+        [_,_,_,_,declRangeStr,_,posStr,...] = declTerms if declRangeStr is "prev"
+        [file,line,col] = declRangeStr[1..-2].split ':'
+        positions = posStr.match /(line|col):([0-9]+)(?::([0-9]+))?/
+        if positions
+          if positions[1] is 'line'
+            [line,col] = [positions[2], positions[3]]
+          else
+            col = positions[2]
+        places.push [file,(Number line),(Number col)]
+    return places
 
   handleEmitPchResult: (code)->
     unless code
