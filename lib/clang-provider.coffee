@@ -63,13 +63,26 @@ class ClangProvider
   returnTypeRe: /\[#([^#]+)#\]/ig
   argumentRe: /\<#([^#]+)#\>/ig
   commentSplitRe: /(?: : (.+))?$/
+  constEndRe: /\[#\s*const#\]$/
+  constPreRe: /^const\s+/
+  spaceAmpEnd: /\s+&$/
+
   convertCompletionLine: (s) ->
+    # Examples of lines:
+    #   COMPLETION: push_back : [#void#]push_back(<#value_type __c#>)
+    #   COMPLETION: c_str : [#const value_type *#]c_str()[# const#]
+    #   COMPLETION: IPv6_ONLY : [#Poco::Net::NetworkInterface::IPVersion#]IPv6_ONLY
+    #
+    # How completion line is generated can be found here:
+    #   http://clang.llvm.org/doxygen/CodeCompleteConsumer_8cpp_source.html
+
     match = s.match(@lineRe)
     if match?
       [line, completion, pattern] = match
       unless pattern?
         return {snippet:completion,text:completion}
       [patternNoComment, briefComment] = pattern.split @commentSplitRe
+      patternNoComment = patternNoComment.replace(@constEndRe, '')
       returnType = null
       patternNoType = patternNoComment.replace @returnTypeRe, (match, type) ->
         returnType = type
@@ -80,7 +93,16 @@ class ClangProvider
         "${#{index}:#{arg}}"
 
       suggestion = {}
-      suggestion.rightLabel = returnType if returnType?
+      if returnType?
+        returnType = returnType.replace(@constPreRe, '').replace(@spaceAmpEnd, '&')
+        nsAndType = returnType.split('::')[-2..-1]
+        if nsAndType.length < 2
+          suggestion.rightLabel = nsAndType[0]
+        else if 12 <= nsAndType[1].length # if we add ns, it won't fit to the right side
+          suggestion.rightLabel = nsAndType[1]
+        else
+          nsLength = 12 - nsAndType[1].length
+          suggestion.rightLabel = nsAndType[0][0..nsLength] + '::' + nsAndType[1]
       if index > 0
         suggestion.snippet = replacement
       else
