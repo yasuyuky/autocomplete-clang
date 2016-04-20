@@ -1,3 +1,6 @@
+## 0.9.1
+* Fix missing dependency
+
 ## 0.9.0
 * Add "autocomplete-clang:go-declaration" command (#92)
 * Fix many bugs and improve output (#96, #99, #100)
