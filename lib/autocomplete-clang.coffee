@@ -1,6 +1,7 @@
 util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
+{existsSync} = require 'fs'
 {CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
 LocationSelectList = require './location-select-view.coffee'
 
@@ -105,15 +106,31 @@ module.exports =
     emit_process.stdin.write headersInput
     emit_process.stdin.end()
 
-  buildGoDeclarationCommandArgs: (editor,lang,term)->
-    std = atom.config.get "autocomplete-clang.std #{lang}"
-    args = ["-x#{lang}", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
-    args = args.concat ["#{term}"]
-    args = args.concat ["-std=#{std}"] if std
-    include_paths = atom.config.get("autocomplete-clang.includePaths")
-    args = args.concat ("-I#{i}" for i in include_paths)
-    args = args.concat ["-"]
-    return args
+  buildGoDeclarationCommandArgs: (editor,language,term)->
+    std = atom.config.get "autocomplete-clang.std #{language}"
+    currentDir = path.dirname(editor.getPath())
+    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
+    pchFile = [pchFilePrefix, language, "pch"].join '.'
+    pchPath = path.join(currentDir, pchFile)
+
+    args = ["-fsyntax-only"]
+    args.push "-x#{language}"
+    args.push "-std=#{std}" if std
+    args.push "-Xclang", "-ast-dump"
+    args.push "-Xclang", "-ast-dump-filter"
+    args.push "-Xclang", "#{term}"
+    args.push("-include-pch", pchPath) if existsSync(pchPath)
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{currentDir}"
+
+    try
+      clangflags = ClangFlags.getClangFlags(editor.getPath())
+      args = args.concat clangflags if clangflags
+    catch error
+      console.log error
+
+    args.push "-"
+    args
 
   buildEmitPchCommandArgs: (editor,lang)->
     dir = path.dirname editor.getPath()
