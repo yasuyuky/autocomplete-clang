@@ -95,29 +95,34 @@ class ClangProvider
     completions = (@convertCompletionLine(s) for s in outputLines)
     (completion for completion in completions when completion?)
 
-  buildClangArgs: (editor, row, column, language)->
-    pch = [(atom.config.get "autocomplete-clang.pchFilePrefix"), language, "pch"].join '.'
-    args = ["-fsyntax-only", "-x#{language}", "-Xclang", "-code-completion-macros", "-Xclang"]
-    location = "-:#{row + 1}:#{column + 1}"
-    args.push("-code-completion-at=#{location}")
-
-    if atom.config.get("autocomplete-clang.includeDocumentation")?
-      args = args.concat ["-Xclang", "-code-completion-brief-comments"]
-      args.push("-fparse-all-comments") if atom.config.get("autocomplete-clang.includeNonDoxygenCommentsAsDocumentation")
-
-    currentDir=path.dirname(editor.getPath())
-    pchPath = path.join(currentDir, 'test.pch')
-    args = args.concat ["-include-pch", pchPath] if existsSync pchPath
+  buildClangArgs: (editor, row, column, language) ->
     std = atom.config.get "autocomplete-clang.std #{language}"
-    args = args.concat ["-std=#{std}"] if std
-    args = args.concat ("-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths")
-    args.push("-I#{currentDir}")
+    currentDir = path.dirname(editor.getPath())
+    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
+    pchFile = [pchFilePrefix, language, "pch"].join '.'
+    pchPath = path.join(currentDir, pchFile)
+
+    args = ["-fsyntax-only"]
+    args.push "-x#{language}"
+    args.push "-std=#{std}" if std
+    args.push "-Xclang", "-code-completion-macros"
+    args.push "-Xclang", "-code-completion-at=-:#{row + 1}:#{column + 1}"
+    args.push("-include-pch", pchPath) if existsSync(pchPath)
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{currentDir}"
+
+    if atom.config.get "autocomplete-clang.includeDocumentation"
+      args.push "-Xclang", "-code-completion-brief-comments"
+      if atom.config.get "autocomplete-clang.includeNonDoxygenCommentsAsDocumentation"
+        args.push "-fparse-all-comments"
+
     try
       clangflags = ClangFlags.getClangFlags(editor.getPath())
       args = args.concat clangflags if clangflags
     catch error
       console.log error
-    args.push("-")
+
+    args.push "-"
     args
 
 LanguageUtil =
