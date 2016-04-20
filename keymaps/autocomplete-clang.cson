@@ -9,3 +9,4 @@
 # https://atom.io/docs/latest/advanced/keymaps
 'atom-workspace':
   'cmd-ctrl-alt-e': 'autocomplete-clang:emit-pch'
+  'ctrl-i': 'autocomplete-clang:go-declaration'

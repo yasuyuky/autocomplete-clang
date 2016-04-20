@@ -2,6 +2,7 @@
 'context-menu':
   'atom-text-editor':[
     {label:'Toggle autocomplete-clang', command:'autocomplete-clang:toggle'}
+    {label:'Goto Declaration', command:'autocomplete-clang:go-declaration'}
   ]
 
 'menu': [

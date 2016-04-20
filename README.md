@@ -24,6 +24,7 @@ This package is currently in an experimental state.
   - default keys `[".","#","::","->"]`
 - Using `std` option like `c++11`
 - Using precompile headers for clang
+- Goto symbol definition in a source file
 
 ## Using precompiled headers
 

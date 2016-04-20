@@ -1,7 +1,7 @@
 util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
-{CompositeDisposable,Disposable} = require 'atom'
+{CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
 ClangProvider = null
 defaultPrecompiled = require './defaultPrecompiled'
 
@@ -61,6 +61,34 @@ module.exports =
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
       'autocomplete-clang:emit-pch': =>
         @emitPch atom.workspace.getActiveTextEditor()
+    @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
+      'autocomplete-clang:go-declaration': => @goDeclaration atom.workspace.getActiveTextEditor()
+
+
+  goDeclaration: (editor)->
+    lang = util.getFirstCursorSourceScopeLang editor
+    unless lang
+      alert "autocomplete-clang:go-declaration\nError: Incompatible Language"
+      return
+    command = atom.config.get "autocomplete-clang.clangCommand"
+    editor.selectWordsContainingCursors();
+    term = editor.getSelectedText()
+    p = editor.getDirectoryPath()
+    args = @buildGoDeclarationCommandArgs(editor,lang,term)
+    options =
+      cwd: path.dirname(editor.getPath())
+      input: editor.getText()
+    new Promise (resolve) =>
+      allOutput = []
+      stdout = (output) => allOutput.push(output)
+      stderr = (output) => console.log output
+      exit = (code) =>
+        resolve(@handleGoDeclarationResult({output:allOutput.join("\n"),term:term, path:p }, code))
+      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
+      bufferedProcess.process.stdin.setEncoding = 'utf-8';
+      bufferedProcess.process.stdin.write(editor.getText())
+      bufferedProcess.process.stdin.end()
+
 
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
@@ -78,6 +106,16 @@ module.exports =
     emit_process.stdin.write headersInput
     emit_process.stdin.end()
 
+  buildGoDeclarationCommandArgs: (editor,lang,term)->
+    std = atom.config.get "autocomplete-clang.std #{lang}"
+    args = ["-x#{lang}-header", "-fsyntax-only", "-Xclang", "-ast-dump", "-Xclang", "-ast-dump-filter","-Xclang" ]
+    args = args.concat ["#{term}"]
+    args = args.concat ["-std=#{std}"] if std
+    include_paths = atom.config.get("autocomplete-clang.includePaths")
+    args = args.concat ("-I#{i}" for i in include_paths)
+    args = args.concat ["-"]
+    return args
+
   buildEmitPchCommandArgs: (editor,lang)->
     dir = path.dirname editor.getPath()
     pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
@@ -90,6 +128,29 @@ module.exports =
     args = args.concat ("-I#{i}" for i in include_paths)
     args = args.concat ["-"]
     return args
+
+  handleGoDeclarationResult: (result,returnCode)->
+    if returnCode is not 0
+        return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
+    outputLines = result['output']
+    t = result['term']
+    baseregex = ///\w+Decl[^<]+<(?!col:)(..[^:,]+):?(\d+):?\d+?.*?col:(\d+).*?\s#{t}\s///
+    classregex = ///\w+Decl[^<]+<([^:,]+):(\d+):(\d+).*?#{t}/// #works for class and enum types
+    m = outputLines.match(baseregex)
+    if (m and m.length > 1 and m[1].trim() is "line") or m is null
+      m = outputLines.match(classregex)
+    if m == null
+      return
+    filematch = m[1] if m and m.length > 1
+    linematch = m[2] if m and m.length > 2
+    colmatch  = m[3] if m and m.length > 3
+    p = result['path'] + '/'
+    if filematch.startsWith("./")
+      filematch = p + filematch
+    f = new File filematch
+    f.exists().then (result) ->
+      if result
+        atom.workspace.open(filematch, {initialLine:Number(linematch)-1, initialColumn:Number(colmatch)-1})
 
   handleEmitPchResult: (code)->
     unless code
