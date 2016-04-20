@@ -1,3 +1,6 @@
+## 0.9.2
+* Fix buildGoDeclarationCommandArgs
+
 ## 0.9.1
 * Fix missing dependency
 
