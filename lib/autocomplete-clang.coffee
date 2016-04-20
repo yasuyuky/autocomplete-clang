@@ -1,8 +1,10 @@
+{CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
 util = require './util'
 {spawn} = require 'child_process'
 path = require 'path'
 {existsSync} = require 'fs'
-{CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
+ClangFlags = require 'clang-flags'
+
 LocationSelectList = require './location-select-view.coffee'
 
 ClangProvider = null

@@ -1,3 +1,6 @@
+## 0.9.3
+* Fix missing require
+
 ## 0.9.2
 * Fix buildGoDeclarationCommandArgs
 
