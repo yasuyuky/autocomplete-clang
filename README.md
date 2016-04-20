@@ -44,7 +44,6 @@ Command for emitting precompiled header is easily access from menu.
 
 If you change the `std` option after you emitted the pch, you should emit pch again.
 
-
 ## Settings
 
 ### Global
@@ -64,18 +63,16 @@ autocomplete-clang will look for a .clang_complete file as used by vim's [clang_
 
 ### Default keymaps
 
-`ctrl+alt+/`: toggle
-
 Also you can customize keymaps by editing ~/.atom/keymap.cson
 (choose Open Your Keymap in Atom menu):
 
 ```cson
 '.workspace':
-  'ctrl-alt-/': 'autocomplete-clang:toggle'
   'cmd-ctrl-alt-e': 'autocomplete-clang:emit-pch'
+  'f3': 'autocomplete-clang:go-declaration'
 ```
 
-See Customizing Atom for more details.
+See [basic customization](http://flight-manual.atom.io/using-atom/sections/basic-customization/#_customizing_keybindings) for more details.
 
 ## License
 
