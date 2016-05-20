@@ -31,10 +31,9 @@ class ClangProvider
       return unless regex.test(line)
 
     if language?
-      @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language).then (suggestions) =>
-        @filterForPrefix(suggestions, prefix)
+      @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language, prefix)
 
-  codeCompletionAt: (editor, row, column, language) ->
+  codeCompletionAt: (editor, row, column, language, prefix) ->
     command = atom.config.get "autocomplete-clang.clangCommand"
     args = @buildClangArgs(editor, row, column, language)
     options =
@@ -45,26 +44,15 @@ class ClangProvider
       allOutput = []
       stdout = (output) => allOutput.push(output)
       stderr = (output) => console.log output
-      exit = (code) => resolve(@handleCompletionResult(allOutput.join('\n'),code))
+      exit = (code) => resolve(@handleCompletionResult(allOutput.join('\n'), code, prefix))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8';
       bufferedProcess.process.stdin.write(editor.getText())
       bufferedProcess.process.stdin.end()
 
-  filterForPrefix: (suggestions, prefix) ->
-    res = []
-    for suggestion in suggestions
-      if (suggestion.snippet or suggestion.text).startsWith(prefix)
-        suggestion.replacementPrefix = prefix
-        res.push(suggestion)
-    res
-
-  convertCompletionLine: (line) ->
+  convertCompletionLine: (line, prefix) ->
     contentRe = /^COMPLETION: (.*)/
-    match = line.match contentRe
-    return unless match?
-
-    [line, content] = match
+    [line, content] = line.match contentRe
     basicInfoRe = /^(.*?) : (.*)/
     match = content.match basicInfoRe
     return {text: content} unless match?
@@ -93,14 +81,18 @@ class ClangProvider
     if isConstMemFunc
       suggestion.displayText = completion + ' const'
     suggestion.description = comment if comment?
+    suggestion.replacementPrefix = prefix
     suggestion
 
-  handleCompletionResult: (result,returnCode) ->
+  handleCompletionResult: (result, returnCode, prefix) ->
     if returnCode is not 0
       return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
-    outputLines = result.trim().split '\n'
-    completions = (@convertCompletionLine(s) for s in outputLines)
-    (completion for completion in completions when completion?)
+    # Find all completions that match our prefix in ONE regex
+    # for performance reasons.
+    completionsRe = new RegExp("^COMPLETION: (" + prefix + ".*)$", "mg")
+    outputLines = result.match(completionsRe)
+    completions = (@convertCompletionLine(line, prefix) for line in outputLines)
+    completions
 
   buildClangArgs: (editor, row, column, language) ->
     std = atom.config.get "autocomplete-clang.std #{language}"
