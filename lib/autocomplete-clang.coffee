@@ -29,6 +29,9 @@ module.exports =
     includeDocumentation:
       type: 'boolean'
       default: true
+    includeSystemHeadersDocumentation:
+      type: 'boolean'
+      default: true
     includeNonDoxygenCommentsAsDocumentation:
       type: 'boolean'
       default: false
