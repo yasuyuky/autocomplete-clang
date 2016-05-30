@@ -11,7 +11,6 @@ module.exports =
 class ClangProvider
   selector: '.source.cpp, .source.c, .source.objc, .source.objcpp'
   inclusionPriority: 1
-  excludeLowerPriority: true
 
   scopeSource:
     'source.cpp': 'c++'
