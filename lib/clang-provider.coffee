@@ -91,8 +91,11 @@ class ClangProvider
     # for performance reasons.
     completionsRe = new RegExp("^COMPLETION: (" + prefix + ".*)$", "mg")
     outputLines = result.match(completionsRe)
-    completions = (@convertCompletionLine(line, prefix) for line in outputLines)
-    completions
+
+    if outputLines?
+        return (@convertCompletionLine(line, prefix) for line in outputLines)
+    else
+        return []
 
   buildClangArgs: (editor, row, column, language) ->
     std = atom.config.get "autocomplete-clang.std #{language}"
