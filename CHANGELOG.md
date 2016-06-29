@@ -1,3 +1,7 @@
+## 0.9.4
+* Avoid excluding autocomplete-plus suggestions
+* Improve performance
+
 ## 0.9.3
 * Fix missing require
 
