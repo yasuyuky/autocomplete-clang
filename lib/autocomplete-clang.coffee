@@ -32,6 +32,7 @@ module.exports =
     includeSystemHeadersDocumentation:
       type: 'boolean'
       default: false
+      description: "**WARNING**: if there are any PCHs compiled without this option, you will have to delete them and generate them again"
     includeNonDoxygenCommentsAsDocumentation:
       type: 'boolean'
       default: false
@@ -147,6 +148,14 @@ module.exports =
     args = args.concat ["-std=#{std}"] if std
     include_paths = atom.config.get "autocomplete-clang.includePaths"
     args = args.concat ("-I#{i}" for i in include_paths)
+
+    if atom.config.get "autocomplete-clang.includeDocumentation"
+      args.push "-Xclang", "-code-completion-brief-comments"
+      if atom.config.get "autocomplete-clang.includeNonDoxygenCommentsAsDocumentation"
+        args.push "-fparse-all-comments"
+      if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
+        args.push "-fretain-comments-from-system-headers"
+
     args = args.concat ["-"]
     return args
 
