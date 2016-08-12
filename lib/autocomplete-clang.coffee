@@ -31,7 +31,7 @@ module.exports =
       default: true
     includeSystemHeadersDocumentation:
       type: 'boolean'
-      default: true
+      default: false
     includeNonDoxygenCommentsAsDocumentation:
       type: 'boolean'
       default: false
