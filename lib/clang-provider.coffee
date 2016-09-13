@@ -116,6 +116,8 @@ class ClangProvider
       args.push "-Xclang", "-code-completion-brief-comments"
       if atom.config.get "autocomplete-clang.includeNonDoxygenCommentsAsDocumentation"
         args.push "-fparse-all-comments"
+      if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
+        args.push "-fretain-comments-from-system-headers"
 
     try
       clangflags = ClangFlags.getClangFlags(editor.getPath())
