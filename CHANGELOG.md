@@ -1,3 +1,7 @@
+## 0.10.0
+* Add the option to show system headers' documentation #118
+* Handle C++ default/optional parameters correctly #121
+
 ## 0.9.4
 * Avoid excluding autocomplete-plus suggestions
 * Improve performance
