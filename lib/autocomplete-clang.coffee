@@ -15,9 +15,14 @@ module.exports =
     clangCommand:
       type: 'string'
       default: 'clang'
-    includePaths:
+    includePathsAbsolute:
       type: 'array'
       default: ['.']
+      items:
+        type: 'string'
+    includePathsRelative:
+      type: 'array'
+      default: [ ]
       items:
         type: 'string'
     pchFilePrefix:
@@ -126,7 +131,8 @@ module.exports =
     args.push "-Xclang", "-ast-dump-filter"
     args.push "-Xclang", "#{term}"
     args.push("-include-pch", pchPath) if existsSync(pchPath)
-    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePathsAbsolute"
+    args.push "-I#{currentDir}/#{i}" for i in atom.config.get "autocomplete-clang.includePathsRelative"
     args.push "-I#{currentDir}"
 
     try
@@ -146,8 +152,11 @@ module.exports =
     std = atom.config.get "autocomplete-clang.std #{lang}"
     args = ["-x#{lang}-header", "-Xclang", '-emit-pch', '-o', pch]
     args = args.concat ["-std=#{std}"] if std
-    include_paths = atom.config.get "autocomplete-clang.includePaths"
+    include_paths = atom.config.get "autocomplete-clang.includePathsAbsolute"
     args = args.concat ("-I#{i}" for i in include_paths)
+    include_paths = atom.config.get "autocomplete-clang.includePathsRelative"
+    args = args.concat ("-I#{dir}/#{i}" for i in include_paths)
+
 
     if atom.config.get "autocomplete-clang.includeDocumentation"
       args.push "-Xclang", "-code-completion-brief-comments"

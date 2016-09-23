@@ -115,7 +115,8 @@ class ClangProvider
     args.push "-Xclang", "-code-completion-macros"
     args.push "-Xclang", "-code-completion-at=-:#{row + 1}:#{column + 1}"
     args.push("-include-pch", pchPath) if existsSync(pchPath)
-    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePathsAbsolute"
+    args.push "-I#{currentDir}/#{i}" for i in atom.config.get "autocomplete-clang.includePathsRelative"
     args.push "-I#{currentDir}"
 
     if atom.config.get "autocomplete-clang.includeDocumentation"
