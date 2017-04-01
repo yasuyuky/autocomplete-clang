@@ -188,7 +188,7 @@ module.exports =
         declTerms = lines[1].split ' '
         [_,_,declRangeStr,_,posStr,...] = declTerms
         [_,_,_,_,declRangeStr,_,posStr,...] = declTerms if declRangeStr is "prev"
-        [file,line,col] = declRangeStr[1..-2].split ':'
+        [_,file,line,col] = declRangeStr.match /<(.*):([0-9]+):([0-9]+),/
         positions = posStr.match /(line|col):([0-9]+)(?::([0-9]+))?/
         if positions
           if positions[1] is 'line'
