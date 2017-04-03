@@ -1,3 +1,6 @@
+## 0.10.1
+* Fix AST parsing with ':' in filenames #147
+
 ## 0.10.0
 * Add the option to show system headers' documentation #118
 * Handle C++ default/optional parameters correctly #121
