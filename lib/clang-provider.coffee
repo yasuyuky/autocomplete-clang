@@ -41,11 +41,11 @@ class ClangProvider
 
     new Promise (resolve) =>
       allOutput = []
-      stdout = (output) => allOutput.push(output)
-      stderr = (output) => console.log output
+      stdout = (output) -> allOutput.push(output)
+      stderr = (output) -> console.log output
       exit = (code) => resolve(@handleCompletionResult(allOutput.join('\n'), code, prefix))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
-      bufferedProcess.process.stdin.setEncoding = 'utf-8';
+      bufferedProcess.process.stdin.setEncoding = 'utf-8'
       bufferedProcess.process.stdin.write(editor.getText())
       bufferedProcess.process.stdin.end()
 
@@ -98,9 +98,9 @@ class ClangProvider
     outputLines = result.match(completionsRe)
 
     if outputLines?
-        return (@convertCompletionLine(line, prefix) for line in outputLines)
+      return (@convertCompletionLine(line, prefix) for line in outputLines)
     else
-        return []
+      return []
 
   buildClangArgs: (editor, row, column, language) ->
     std = atom.config.get "autocomplete-clang.std #{language}"

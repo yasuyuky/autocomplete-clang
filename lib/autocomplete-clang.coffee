@@ -32,7 +32,9 @@ module.exports =
     includeSystemHeadersDocumentation:
       type: 'boolean'
       default: false
-      description: "**WARNING**: if there are any PCHs compiled without this option, you will have to delete them and generate them again"
+      description:
+        "**WARNING**: if there are any PCHs compiled without this option,"+
+        "you will have to delete them and generate them again"
     includeNonDoxygenCommentsAsDocumentation:
       type: 'boolean'
       default: false
@@ -71,7 +73,8 @@ module.exports =
       'autocomplete-clang:emit-pch': =>
         @emitPch atom.workspace.getActiveTextEditor()
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
-      'autocomplete-clang:go-declaration': (e)=> @goDeclaration atom.workspace.getActiveTextEditor(),e
+      'autocomplete-clang:go-declaration': (e)=>
+        @goDeclaration atom.workspace.getActiveTextEditor(),e
 
   goDeclaration: (editor,e)->
     lang = util.getFirstCursorSourceScopeLang editor
@@ -79,7 +82,7 @@ module.exports =
       e.abortKeyBinding()
       return
     command = atom.config.get "autocomplete-clang.clangCommand"
-    editor.selectWordsContainingCursors();
+    editor.selectWordsContainingCursors()
     term = editor.getSelectedText()
     args = @buildGoDeclarationCommandArgs(editor,lang,term)
     options =
@@ -87,12 +90,12 @@ module.exports =
       input: editor.getText()
     new Promise (resolve) =>
       allOutput = []
-      stdout = (output) => allOutput.push(output)
-      stderr = (output) => console.log output
+      stdout = (output) -> allOutput.push(output)
+      stderr = (output) -> console.log output
       exit = (code) =>
         resolve(@handleGoDeclarationResult(editor, {output:allOutput.join("\n"),term:term}, code))
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
-      bufferedProcess.process.stdin.setEncoding = 'utf-8';
+      bufferedProcess.process.stdin.setEncoding = 'utf-8'
       bufferedProcess.process.stdin.write(editor.getText())
       bufferedProcess.process.stdin.end()
 
@@ -164,10 +167,10 @@ module.exports =
       return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     places = @parseAstDump result['output'], result['term']
     if places.length is 1
-        @goToLocation editor, places.pop()
+      @goToLocation editor, places.pop()
     else if places.length > 1
-        list = new LocationSelectList(editor, @goToLocation)
-        list.setItems(places)
+      list = new LocationSelectList(editor, @goToLocation)
+      list.setItems(places)
 
   goToLocation: (editor, [file,line,col]) ->
     if file is '<stdin>'
