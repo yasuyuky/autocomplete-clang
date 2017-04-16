@@ -5,6 +5,8 @@ like [emacs auto-complete-clang.el](https://github.com/brianjcj/auto-complete-cl
 
 using [autocomplete-plus](https://atom.io/packages/autocomplete-plus)
 
+![travis-ci](https://api.travis-ci.org/yasuyuky/autocomplete-clang.svg?branch=master)
+
 **for `C`/`C++`/`Objective-C`**
 
 ![Screenshot for how autocomplete works](https://raw.githubusercontent.com/yasuyuky/autocomplete-clang/DocumentImage/images/autocomplete-clang.gif)
