@@ -144,7 +144,6 @@ module.exports =
   buildEmitPchCommandArgs: (editor,language)->
     std = atom.config.get "autocomplete-clang.std #{language}"
     currentDir = path.dirname editor.getPath()
-    console.log "currentDir",currentDir
     pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
     pchFile = [pch_file_prefix, language, "pch"].join '.'
     pchPath = path.join currentDir,pchFile
