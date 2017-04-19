@@ -1,3 +1,6 @@
+fs = require 'fs'
+path = require 'path'
+
 describe "C++ autocompletions", ->
   [editor, provider] = []
 
@@ -36,3 +39,8 @@ describe "C++ autocompletions", ->
     completions = getCompletions()
     completions.then (c)->
       expect(c.length).toBeGreaterThan(100)
+
+  it "emits precompiled headers", ->
+    atom.packages.getActivePackage('autocomplete-clang').mainModule.emitPch editor
+    pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
+    expect(fs.statSync(path.join 'tmp', pchFile)).not.toBe(undefined)
