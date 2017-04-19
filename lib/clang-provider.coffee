@@ -33,13 +33,10 @@ class ClangProvider
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language, prefix)
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
-    command = atom.config.get "autocomplete-clang.clangCommand"
-    args = @buildClangArgs(editor, row, column, language)
-    options =
-      cwd: path.dirname(editor.getPath())
-      input: editor.getText()
-
     new Promise (resolve) =>
+      command = atom.config.get "autocomplete-clang.clangCommand"
+      args = buildCodeCompletionArgs editor, row, column, language
+      options = cwd: path.dirname editor.getPath()
       allOutput = []
       stdout = (output) -> allOutput.push(output)
       stderr = (output) -> console.log output
@@ -101,38 +98,6 @@ class ClangProvider
       return (@convertCompletionLine(line, prefix) for line in outputLines)
     else
       return []
-
-  buildClangArgs: (editor, row, column, language) ->
-    std = atom.config.get "autocomplete-clang.std #{language}"
-    currentDir = path.dirname(editor.getPath())
-    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
-    pchFile = [pchFilePrefix, language, "pch"].join '.'
-    pchPath = path.join(currentDir, pchFile)
-
-    args = ["-fsyntax-only"]
-    args.push "-x#{language}"
-    args.push "-std=#{std}" if std
-    args.push "-Xclang", "-code-completion-macros"
-    args.push "-Xclang", "-code-completion-at=-:#{row + 1}:#{column + 1}"
-    args.push("-include-pch", pchPath) if existsSync(pchPath)
-    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
-    args.push "-I#{currentDir}"
-
-    if atom.config.get "autocomplete-clang.includeDocumentation"
-      args.push "-Xclang", "-code-completion-brief-comments"
-      if atom.config.get "autocomplete-clang.includeNonDoxygenCommentsAsDocumentation"
-        args.push "-fparse-all-comments"
-      if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
-        args.push "-fretain-comments-from-system-headers"
-
-    try
-      clangflags = ClangFlags.getClangFlags(editor.getPath())
-      args = args.concat clangflags if clangflags
-    catch error
-      console.log error
-
-    args.push "-"
-    args
 
 LanguageUtil =
   getSourceScopeLang: (scopeSource, scopesArray) ->

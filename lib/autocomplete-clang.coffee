@@ -1,10 +1,7 @@
 {CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
-util = require './util'
-{spawn} = require 'child_process'
 path = require 'path'
-{existsSync} = require 'fs'
-ClangFlags = require 'clang-flags'
-
+util = require './util'
+{buildGoDeclarationCommandArgs,buildEmitPchCommandArgs} = require './clang-args-builder'
 LocationSelectList = require './location-select-view.coffee'
 
 ClangProvider = null
@@ -85,7 +82,7 @@ module.exports =
       command = atom.config.get "autocomplete-clang.clangCommand"
       editor.selectWordsContainingCursors()
       term = editor.getSelectedText()
-      args = @buildGoDeclarationCommandArgs(editor,lang,term)
+      args = buildGoDeclarationCommandArgs editor,lang,term
       options = cwd: path.dirname(editor.getPath())
       allOutput = []
       stdout = (output) -> allOutput.push(output)
@@ -106,7 +103,7 @@ module.exports =
       headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
       headersInput = ("#include <#{h}>" for h in headers).join "\n"
       command = atom.config.get "autocomplete-clang.clangCommand"
-      args = @buildEmitPchCommandArgs editor,lang
+      args = buildEmitPchCommandArgs editor,lang
       options = cwd: path.dirname editor.getPath()
       stdout = (output) -> console.log "out:\n"+output.toString()
       stderr = (output) -> console.log "err:\n"+output.toString()
@@ -115,54 +112,6 @@ module.exports =
       bufferedProcess.process.stdin.setEncoding = 'utf-8'
       bufferedProcess.process.stdin.write(headersInput)
       bufferedProcess.process.stdin.end()
-
-  buildGoDeclarationCommandArgs: (editor,language,term)->
-    std = atom.config.get "autocomplete-clang.std #{language}"
-    currentDir = path.dirname editor.getPath()
-    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
-    pchFile = [pchFilePrefix, language, "pch"].join '.'
-    pchPath = path.join currentDir, pchFile
-
-    args = ["-fsyntax-only"]
-    args.push "-x#{language}"
-    args.push "-std=#{std}" if std
-    args.push "-Xclang", "-ast-dump"
-    args.push "-Xclang", "-ast-dump-filter"
-    args.push "-Xclang", "#{term}"
-    args.push("-include-pch", pchPath) if existsSync(pchPath)
-    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
-    args.push "-I#{currentDir}"
-
-    try
-      clangflags = ClangFlags.getClangFlags(editor.getPath())
-      args = args.concat clangflags if clangflags
-    catch error
-      console.log error
-
-    args.push "-"
-    args
-
-  buildEmitPchCommandArgs: (editor,language)->
-    std = atom.config.get "autocomplete-clang.std #{language}"
-    currentDir = path.dirname editor.getPath()
-    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
-    pchFile = [pchFilePrefix, language, "pch"].join '.'
-    pchPath = path.join currentDir,pchFile
-
-    args = ["-x#{language}-header", "-Xclang", '-emit-pch', '-o', pchPath]
-    args.push "-std=#{std}" if std
-    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
-    args.push "-I#{currentDir}"
-
-    if atom.config.get "autocomplete-clang.includeDocumentation"
-      args.push "-Xclang", "-code-completion-brief-comments"
-      if atom.config.get "autocomplete-clang.includeNonDoxygenCommentsAsDocumentation"
-        args.push "-fparse-all-comments"
-      if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
-        args.push "-fretain-comments-from-system-headers"
-
-    args.push "-"
-    args
 
   handleGoDeclarationResult: (editor, result, returnCode)->
     if returnCode is not 0
