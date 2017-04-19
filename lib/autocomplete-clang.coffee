@@ -104,16 +104,16 @@ module.exports =
     unless lang
       atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return
-    clang_command = atom.config.get "autocomplete-clang.clangCommand"
+    clangCommand = atom.config.get "autocomplete-clang.clangCommand"
     args = @buildEmitPchCommandArgs editor,lang
-    emit_process = spawn clang_command,args
-    emit_process.on "exit", (code) => @handleEmitPchResult code
-    emit_process.stdout.on 'data', (data)-> console.log "out:\n"+data.toString()
-    emit_process.stderr.on 'data', (data)-> console.log "err:\n"+data.toString()
+    emitProcess = spawn clangCommand,args
+    emitProcess.on "exit", (code) => @handleEmitPchResult code
+    emitProcess.stdout.on 'data', (data)-> console.log "out:\n"+data.toString()
+    emitProcess.stderr.on 'data', (data)-> console.log "err:\n"+data.toString()
     headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
     headersInput = ("#include <#{h}>" for h in headers).join "\n"
-    emit_process.stdin.write headersInput
-    emit_process.stdin.end()
+    emitProcess.stdin.write headersInput
+    emitProcess.stdin.end()
 
   buildGoDeclarationCommandArgs: (editor,language,term)->
     std = atom.config.get "autocomplete-clang.std #{language}"
@@ -144,8 +144,8 @@ module.exports =
   buildEmitPchCommandArgs: (editor,language)->
     std = atom.config.get "autocomplete-clang.std #{language}"
     currentDir = path.dirname editor.getPath()
-    pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
-    pchFile = [pch_file_prefix, language, "pch"].join '.'
+    pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
+    pchFile = [pchFilePrefix, language, "pch"].join '.'
     pchPath = path.join currentDir,pchFile
 
     args = ["-x#{language}-header", "-Xclang", '-emit-pch', '-o', pchPath]
