@@ -2,26 +2,20 @@
 # Copyright (c) 2015 Ben Ogle under MIT license
 # Clang related code from https://github.com/yasuyuky/autocomplete-clang
 
-{Point, Range, BufferedProcess, CompositeDisposable} = require 'atom'
+{Range, BufferedProcess, CompositeDisposable} = require 'atom'
 path = require 'path'
-{existsSync} = require 'fs'
-ClangFlags = require 'clang-flags'
+{buildCodeCompletionArgs} = require './clang-args-builder'
+{getSourceScopeLang, prefixAtPosition, nearestSymbolPosition} = require './util'
 
 module.exports =
 class ClangProvider
   selector: '.source.cpp, .source.c, .source.objc, .source.objcpp'
   inclusionPriority: 1
 
-  scopeSource:
-    'source.cpp': 'c++'
-    'source.c': 'c'
-    'source.objc': 'objective-c'
-    'source.objcpp': 'objective-c++'
-
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->
-    language = LanguageUtil.getSourceScopeLang(@scopeSource, scopeDescriptor.getScopesArray())
-    prefix = LanguageUtil.prefixAtPosition(editor, bufferPosition)
-    [symbolPosition,lastSymbol] = LanguageUtil.nearestSymbolPosition(editor, bufferPosition)
+    language = getSourceScopeLang scopeDescriptor.getScopesArray()
+    prefix = prefixAtPosition(editor, bufferPosition)
+    [symbolPosition,lastSymbol] = nearestSymbolPosition(editor, bufferPosition)
     minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength')
 
     if minimumWordLength? and prefix.length < minimumWordLength
@@ -98,25 +92,3 @@ class ClangProvider
       return (@convertCompletionLine(line, prefix) for line in outputLines)
     else
       return []
-
-LanguageUtil =
-  getSourceScopeLang: (scopeSource, scopesArray) ->
-    for scope in scopesArray
-      return scopeSource[scope] if scope of scopeSource
-    null
-
-  prefixAtPosition: (editor, bufferPosition) ->
-    regex = /\w+$/
-    line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
-    line.match(regex)?[0] or ''
-
-  nearestSymbolPosition: (editor, bufferPosition) ->
-    regex = /(\W+)\w*$/
-    line = editor.getTextInRange([[bufferPosition.row, 0], bufferPosition])
-    matches = line.match(regex)
-    if matches
-      symbol = matches[1]
-      symbolColumn = matches[0].indexOf(symbol) + symbol.length + (line.length - matches[0].length)
-      [new Point(bufferPosition.row, symbolColumn),symbol[-1..]]
-    else
-      [bufferPosition,'']
