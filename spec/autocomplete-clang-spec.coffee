@@ -46,3 +46,19 @@ describe "C++ autocompletions", ->
     runs ->
       pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
       expect(fs.statSync(path.join 'tmp', pchFile)).not.toBe(undefined)
+
+  it "moves cursor to declaration", ->
+    editor.setText """
+    #include<string>
+
+    int main() {
+      std::string s;
+      s;
+      return 0;
+    }
+    """
+    editor.setCursorBufferPosition([4, 3])
+    waitsForPromise ->
+      atom.packages.getActivePackage('autocomplete-clang').mainModule.goDeclaration editor
+    runs ->
+      expect(editor.getCursorBufferPosition()).toEqual({row:3, column:14})
