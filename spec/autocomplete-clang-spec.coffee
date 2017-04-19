@@ -34,5 +34,5 @@ describe "C++ autocompletions", ->
     """
     editor.setCursorBufferPosition([4, 4])
     completions = getCompletions()
-    completions.then ->
-      expect(completions.length).toBeGreaterThan(100)
+    completions.then (c)->
+      expect(c.length).toBeGreaterThan(100)
