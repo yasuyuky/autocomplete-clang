@@ -117,10 +117,10 @@ module.exports =
 
   buildGoDeclarationCommandArgs: (editor,language,term)->
     std = atom.config.get "autocomplete-clang.std #{language}"
-    currentDir = path.dirname(editor.getPath())
+    currentDir = path.dirname editor.getPath()
     pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
     pchFile = [pchFilePrefix, language, "pch"].join '.'
-    pchPath = path.join(currentDir, pchFile)
+    pchPath = path.join currentDir, pchFile
 
     args = ["-fsyntax-only"]
     args.push "-x#{language}"
@@ -141,16 +141,18 @@ module.exports =
     args.push "-"
     args
 
-  buildEmitPchCommandArgs: (editor,lang)->
-    dir = path.dirname editor.getPath()
+  buildEmitPchCommandArgs: (editor,language)->
+    std = atom.config.get "autocomplete-clang.std #{language}"
+    currentDir = path.dirname editor.getPath()
+    console.log "currentDir",currentDir
     pch_file_prefix = atom.config.get "autocomplete-clang.pchFilePrefix"
-    file = [pch_file_prefix, lang, "pch"].join '.'
-    pch = path.join dir,file
-    std = atom.config.get "autocomplete-clang.std #{lang}"
-    args = ["-x#{lang}-header", "-Xclang", '-emit-pch', '-o', pch]
-    args = args.concat ["-std=#{std}"] if std
-    include_paths = atom.config.get "autocomplete-clang.includePaths"
-    args = args.concat ("-I#{i}" for i in include_paths)
+    pchFile = [pch_file_prefix, language, "pch"].join '.'
+    pchPath = path.join currentDir,pchFile
+
+    args = ["-x#{language}-header", "-Xclang", '-emit-pch', '-o', pchPath]
+    args.push "-std=#{std}" if std
+    args.push "-I#{i}" for i in atom.config.get "autocomplete-clang.includePaths"
+    args.push "-I#{currentDir}"
 
     if atom.config.get "autocomplete-clang.includeDocumentation"
       args.push "-Xclang", "-code-completion-brief-comments"
@@ -159,8 +161,8 @@ module.exports =
       if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
         args.push "-fretain-comments-from-system-headers"
 
-    args = args.concat ["-"]
-    return args
+    args.push "-"
+    args
 
   handleGoDeclarationResult: (editor, result, returnCode)->
     if returnCode is not 0
