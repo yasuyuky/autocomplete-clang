@@ -45,7 +45,7 @@ describe "C++ autocompletions", ->
       atom.packages.getActivePackage('autocomplete-clang').mainModule.emitPch editor
     runs ->
       pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
-      expect(fs.statSync(path.join 'tmp', pchFile)).not.toBe(undefined)
+      expect(fs.statSync(path.join '/tmp', pchFile)).not.toBe(undefined)
 
   it "moves cursor to declaration", ->
     editor.setText """
