@@ -102,7 +102,7 @@ module.exports =
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
     unless lang
-      alert "autocomplete-clang:emit-pch\nError: Incompatible Language"
+      atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return
     clang_command = atom.config.get "autocomplete-clang.clangCommand"
     args = @buildEmitPchCommandArgs editor,lang
@@ -205,9 +205,9 @@ module.exports =
 
   handleEmitPchResult: (code)->
     unless code
-      alert "Emiting precompiled header has successfully finished"
+      atom.notifications.addSuccess "Emiting precompiled header has successfully finished"
       return
-    alert "Emiting precompiled header exit with #{code}\n"+
+    atom.notifications.addError "Emiting precompiled header exit with #{code}\n"+
       "See console for detailed error message"
 
   deactivate: ->
