@@ -81,14 +81,12 @@ module.exports =
     unless lang
       e.abortKeyBinding()
       return
-    command = atom.config.get "autocomplete-clang.clangCommand"
-    editor.selectWordsContainingCursors()
-    term = editor.getSelectedText()
-    args = @buildGoDeclarationCommandArgs(editor,lang,term)
-    options =
-      cwd: path.dirname(editor.getPath())
-      input: editor.getText()
     new Promise (resolve) =>
+      command = atom.config.get "autocomplete-clang.clangCommand"
+      editor.selectWordsContainingCursors()
+      term = editor.getSelectedText()
+      args = @buildGoDeclarationCommandArgs(editor,lang,term)
+      options = cwd: path.dirname(editor.getPath())
       allOutput = []
       stdout = (output) -> allOutput.push(output)
       stderr = (output) -> console.log output
