@@ -105,8 +105,8 @@ module.exports =
       command = atom.config.get "autocomplete-clang.clangCommand"
       args = buildEmitPchCommandArgs editor,lang
       options = cwd: path.dirname editor.getPath()
-      stdout = (output) -> console.log "out:\n"+output.toString()
-      stderr = (output) -> console.log "err:\n"+output.toString()
+      stdout = (output) -> console.log "-emit-pch out:\n"+output.toString()
+      stderr = (output) -> console.log "-emit-pch err:\n"+output.toString()
       exit = (code) => resolve(@handleEmitPchResult code)
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8'
@@ -161,7 +161,6 @@ module.exports =
 
   deactivate: ->
     @deactivationDisposables.dispose()
-    console.log "autocomplete-clang deactivated"
 
   provide: ->
     ClangProvider ?= require('./clang-provider')
