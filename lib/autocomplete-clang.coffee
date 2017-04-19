@@ -104,16 +104,19 @@ module.exports =
     unless lang
       atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return
-    clangCommand = atom.config.get "autocomplete-clang.clangCommand"
-    args = @buildEmitPchCommandArgs editor,lang
-    emitProcess = spawn clangCommand,args
-    emitProcess.on "exit", (code) => @handleEmitPchResult code
-    emitProcess.stdout.on 'data', (data)-> console.log "out:\n"+data.toString()
-    emitProcess.stderr.on 'data', (data)-> console.log "err:\n"+data.toString()
-    headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
-    headersInput = ("#include <#{h}>" for h in headers).join "\n"
-    emitProcess.stdin.write headersInput
-    emitProcess.stdin.end()
+    new Promise (resolve) =>
+      headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
+      headersInput = ("#include <#{h}>" for h in headers).join "\n"
+      command = atom.config.get "autocomplete-clang.clangCommand"
+      args = @buildEmitPchCommandArgs editor,lang
+      options = cwd: path.dirname editor.getPath()
+      stdout = (output) -> console.log "out:\n"+output.toString()
+      stderr = (output) -> console.log "err:\n"+output.toString()
+      exit = (code) => resolve(@handleEmitPchResult code)
+      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
+      bufferedProcess.process.stdin.setEncoding = 'utf-8'
+      bufferedProcess.process.stdin.write(headersInput)
+      bufferedProcess.process.stdin.end()
 
   buildGoDeclarationCommandArgs: (editor,language,term)->
     std = atom.config.get "autocomplete-clang.std #{language}"

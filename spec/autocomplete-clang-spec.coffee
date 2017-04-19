@@ -41,6 +41,8 @@ describe "C++ autocompletions", ->
       expect(c.length).toBeGreaterThan(100)
 
   it "emits precompiled headers", ->
-    atom.packages.getActivePackage('autocomplete-clang').mainModule.emitPch editor
-    pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
-    expect(fs.statSync(path.join 'tmp', pchFile)).not.toBe(undefined)
+    waitsForPromise ->
+      atom.packages.getActivePackage('autocomplete-clang').mainModule.emitPch editor
+    runs ->
+      pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
+      expect(fs.statSync(path.join 'tmp', pchFile)).not.toBe(undefined)
