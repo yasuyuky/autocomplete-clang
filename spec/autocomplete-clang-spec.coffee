@@ -36,9 +36,10 @@ describe "C++ autocompletions", ->
     }
     """
     editor.setCursorBufferPosition([4, 4])
-    completions = getCompletions()
-    completions.then (c)->
-      expect(c.length).toBeGreaterThan(100)
+    waitsForPromise ->
+      completions = getCompletions()
+      completions.then (cs)->
+        expect(cs.length).toBeGreaterThan(100)
 
   it "emits precompiled headers", ->
     waitsForPromise ->
