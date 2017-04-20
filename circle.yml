@@ -2,6 +2,7 @@ dependencies:
   override:
     - curl -s -O https://raw.githubusercontent.com/atom/ci/master/build-package.sh
     - chmod u+x build-package.sh
+    - sudo apt-get install -y clang
 
 test:
   override:
