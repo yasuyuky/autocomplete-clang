@@ -11,7 +11,8 @@
   },
   "dependencies": {
     "atom-space-pen-views": "^2.2.0",
-    "clang-flags": "0.2.2"
+    "clang-flags": "0.2.2",
+    "tmp": "0.0.31"
   },
   "providedServices": {
     "autocomplete.provider": {

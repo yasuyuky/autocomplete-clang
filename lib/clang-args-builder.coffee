@@ -1,6 +1,7 @@
 {BufferedProcess} = require 'atom'
 path = require 'path'
-{existsSync} = require 'fs'
+fs = require 'fs'
+tmp = require 'tmp'
 ClangFlags = require 'clang-flags'
 
 module.exports =
@@ -12,7 +13,14 @@ module.exports =
       [outputs, errors] = [[], []]
       stdout = (data)-> outputs.push data
       stderr = (data)-> errors.push data
-      exit = (code)-> callback code, (outputs.join '\n'), (errors.join '\n'), resolve
+      if args.length > (atom.config.get "autocomplete-clang.argsCountThreshold" or 7000)
+        [args, filePath] = makeFileBasedArgs args, editor
+        console.log 'tempfile for args: '+filePath
+        exit = (code)->
+          fs.unlinkSync filePath
+          callback code, (outputs.join '\n'), (errors.join '\n'), resolve
+      else
+        exit = (code)-> callback code, (outputs.join '\n'), (errors.join '\n'), resolve
       bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
       bufferedProcess.process.stdin.setEncoding = 'utf-8'
       bufferedProcess.process.stdin.write input
@@ -25,7 +33,7 @@ module.exports =
     args.push "-x#{language}"
     args.push "-Xclang", "-code-completion-macros"
     args.push "-Xclang", "-code-completion-at=-:#{row + 1}:#{column + 1}"
-    args.push("-include-pch", pchPath) if existsSync(pchPath)
+    args.push("-include-pch", pchPath) if fs.existsSync(pchPath)
     addCommonArgs args, std, currentDir, pchPath, filePath
 
   buildGoDeclarationCommandArgs: (editor, language, term)->
@@ -36,7 +44,7 @@ module.exports =
     args.push "-Xclang", "-ast-dump"
     args.push "-Xclang", "-ast-dump-filter"
     args.push "-Xclang", "#{term}"
-    args.push("-include-pch", pchPath) if existsSync(pchPath)
+    args.push("-include-pch", pchPath) if fs.existsSync(pchPath)
     addCommonArgs args, std, currentDir, pchPath, filePath
 
   buildEmitPchCommandArgs: (editor, language)->
@@ -83,3 +91,14 @@ addDocumentationArgs = (args)->
     if atom.config.get "autocomplete-clang.includeSystemHeadersDocumentation"
       args.push "-fretain-comments-from-system-headers"
   args
+
+makeFileBasedArgs = (args, editor)->
+  args = args.join('\n')
+  args = args.replace /\\/g, "\\\\"
+  args = args.replace /\ /g, "\\\ "
+  fileName = tmp.tmpNameSync(template: '.autocomplete-clang-XXXXXX')
+  filePath = path.join (path.dirname editor.getPath()), fileName
+  fs.writeFile filePath, args, (error) ->
+    console.error("Error writing file", error) if error
+  args = ['@' + filePath]
+  [args, filePath]
