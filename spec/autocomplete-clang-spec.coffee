@@ -5,7 +5,7 @@ tmp = require 'tmp'
 
 describe "C++ autocompletions", ->
   [editor, provider] = []
-  workdir = path.dirname __filename
+  workdir = os.tmpdir()
 
   getCompletions = ->
     cursor = editor.getLastCursor()
