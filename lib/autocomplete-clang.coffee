@@ -1,6 +1,7 @@
-{CompositeDisposable,Disposable,BufferedProcess,Selection,File} = require 'atom'
+{CompositeDisposable,Disposable,Selection,File} = require 'atom'
 path = require 'path'
 util = require './util'
+{makeBufferedClangProcess}  = require './clang-args-builder'
 {buildGoDeclarationCommandArgs,buildEmitPchCommandArgs} = require './clang-args-builder'
 LocationSelectList = require './location-select-view.coffee'
 
@@ -78,45 +79,32 @@ module.exports =
     unless lang
       e.abortKeyBinding()
       return
-    new Promise (resolve) =>
-      command = atom.config.get "autocomplete-clang.clangCommand"
-      editor.selectWordsContainingCursors()
-      term = editor.getSelectedText()
-      args = buildGoDeclarationCommandArgs editor,lang,term
-      options = cwd: path.dirname(editor.getPath())
-      allOutput = []
-      stdout = (output) -> allOutput.push(output)
-      stderr = (output) -> console.log output
-      exit = (code) =>
-        resolve(@handleGoDeclarationResult(editor, {output:allOutput.join("\n"),term:term}, code))
-      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
-      bufferedProcess.process.stdin.setEncoding = 'utf-8'
-      bufferedProcess.process.stdin.write(editor.getText())
-      bufferedProcess.process.stdin.end()
+    editor.selectWordsContainingCursors()
+    term = editor.getSelectedText()
+    args = buildGoDeclarationCommandArgs editor, lang, term
+    callback = (code, outputs, errors, resolve) =>
+      console.log "GoDecl err\n", errors
+      resolve(@handleGoDeclarationResult editor, {output:outputs, term:term}, code)
+    makeBufferedClangProcess editor, args, callback, editor.getText()
 
   emitPch: (editor)->
     lang = util.getFirstCursorSourceScopeLang editor
     unless lang
       atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return
-    new Promise (resolve) =>
-      headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
-      headersInput = ("#include <#{h}>" for h in headers).join "\n"
-      command = atom.config.get "autocomplete-clang.clangCommand"
-      args = buildEmitPchCommandArgs editor,lang
-      options = cwd: path.dirname editor.getPath()
-      stdout = (output) -> console.log "-emit-pch out:\n"+output.toString()
-      stderr = (output) -> console.log "-emit-pch err:\n"+output.toString()
-      exit = (code) => resolve(@handleEmitPchResult code)
-      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
-      bufferedProcess.process.stdin.setEncoding = 'utf-8'
-      bufferedProcess.process.stdin.write(headersInput)
-      bufferedProcess.process.stdin.end()
+    headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
+    headersInput = ("#include <#{h}>" for h in headers).join "\n"
+    args = buildEmitPchCommandArgs editor, lang
+    callback = (code, outputs, errors, resolve) =>
+      console.log "-emit-pch out\n", outputs
+      console.log "-emit-pch err\n", errors
+      resolve(@handleEmitPchResult code)
+    makeBufferedClangProcess editor, args, callback, headersInput
 
   handleGoDeclarationResult: (editor, result, returnCode)->
     if returnCode is not 0
       return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
-    places = @parseAstDump result['output'], result['term']
+    places = @parseAstDump result.output, result.term
     if places.length is 1
       @goToLocation editor, places.pop()
     else if places.length > 1

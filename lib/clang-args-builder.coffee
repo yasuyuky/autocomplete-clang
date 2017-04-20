@@ -1,8 +1,22 @@
+{BufferedProcess} = require 'atom'
 path = require 'path'
 {existsSync} = require 'fs'
 ClangFlags = require 'clang-flags'
 
 module.exports =
+
+  makeBufferedClangProcess: (editor, args, callback, input)->
+    new Promise (resolve) ->
+      command = atom.config.get "autocomplete-clang.clangCommand"
+      options = cwd: path.dirname editor.getPath()
+      [outputs, errors] = [[], []]
+      stdout = (data)-> outputs.push data
+      stderr = (data)-> errors.push data
+      exit = (code)-> callback code, (outputs.join '\n'), (errors.join '\n'), resolve
+      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
+      bufferedProcess.process.stdin.setEncoding = 'utf-8'
+      bufferedProcess.process.stdin.write input
+      bufferedProcess.process.stdin.end()
 
   buildCodeCompletionArgs: (editor, row, column, language) ->
     {std, filePath, currentDir, pchPath} = getCommonArgs editor,language

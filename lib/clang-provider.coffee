@@ -2,9 +2,9 @@
 # Copyright (c) 2015 Ben Ogle under MIT license
 # Clang related code from https://github.com/yasuyuky/autocomplete-clang
 
-{Range, BufferedProcess, CompositeDisposable} = require 'atom'
+{Range, CompositeDisposable} = require 'atom'
 path = require 'path'
-{buildCodeCompletionArgs} = require './clang-args-builder'
+{makeBufferedClangProcess, buildCodeCompletionArgs} = require './clang-args-builder'
 {getSourceScopeLang, prefixAtPosition, nearestSymbolPosition} = require './util'
 
 module.exports =
@@ -27,18 +27,11 @@ class ClangProvider
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language, prefix)
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
-    new Promise (resolve) =>
-      command = atom.config.get "autocomplete-clang.clangCommand"
-      args = buildCodeCompletionArgs editor, row, column, language
-      options = cwd: path.dirname editor.getPath()
-      allOutput = []
-      stdout = (output) -> allOutput.push(output)
-      stderr = (output) -> console.log output
-      exit = (code) => resolve(@handleCompletionResult(allOutput.join('\n'), code, prefix))
-      bufferedProcess = new BufferedProcess({command, args, options, stdout, stderr, exit})
-      bufferedProcess.process.stdin.setEncoding = 'utf-8'
-      bufferedProcess.process.stdin.write(editor.getText())
-      bufferedProcess.process.stdin.end()
+    args = buildCodeCompletionArgs editor, row, column, language
+    callback = (code, outputs, errors, resolve) =>
+      console.log errors
+      resolve(@handleCompletionResult(outputs, code, prefix))
+    makeBufferedClangProcess editor, args, callback, editor.getText()
 
   convertCompletionLine: (line, prefix) ->
     contentRe = /^COMPLETION: (.*)/
