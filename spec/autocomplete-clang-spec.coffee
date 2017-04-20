@@ -1,6 +1,7 @@
 os = require 'os'
 fs = require 'fs'
 path = require 'path'
+tmp = require 'tmp'
 
 describe "C++ autocompletions", ->
   [editor, provider] = []
@@ -23,7 +24,8 @@ describe "C++ autocompletions", ->
     waitsForPromise -> atom.packages.activatePackage('autocomplete-clang')
     runs ->
       provider = atom.packages.getActivePackage('autocomplete-clang').mainModule.provide()
-    waitsForPromise -> atom.workspace.open(path.join(workdir, 'test.cpp'))
+    waitsForPromise ->
+      atom.workspace.open(path.join(workdir, tmp.tmpNameSync(template: 'XXXXXX.cpp')))
     runs ->
       editor = atom.workspace.getActiveTextEditor()
 
