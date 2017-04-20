@@ -1,3 +1,8 @@
+## 0.11.0
+* Add some tests
+* Large Refactoring
+* Add workaround for case with many arguments
+
 ## 0.10.1
 * Fix AST parsing with ':' in filenames #147
 
