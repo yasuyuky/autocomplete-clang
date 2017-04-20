@@ -13,7 +13,7 @@ module.exports =
       [outputs, errors] = [[], []]
       stdout = (data)-> outputs.push data
       stderr = (data)-> errors.push data
-      if args.length > (atom.config.get "autocomplete-clang.argsCountThreshold" or 7000)
+      if (args.join(" ")).length > (atom.config.get "autocomplete-clang.argsCountThreshold" or 7000)
         [args, filePath] = makeFileBasedArgs args, editor
         console.log 'tempfile for args: '+filePath
         exit = (code)->
