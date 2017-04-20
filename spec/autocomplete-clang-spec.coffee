@@ -1,3 +1,4 @@
+os = require 'os'
 fs = require 'fs'
 path = require 'path'
 
@@ -21,7 +22,7 @@ describe "C++ autocompletions", ->
     waitsForPromise -> atom.packages.activatePackage('autocomplete-clang')
     runs ->
       provider = atom.packages.getActivePackage('autocomplete-clang').mainModule.provide()
-    waitsForPromise -> atom.workspace.open('/tmp/test.cpp')
+    waitsForPromise -> atom.workspace.open(path.join(os.tmpdir(), 'test.cpp'))
     runs ->
       editor = atom.workspace.getActiveTextEditor()
 
@@ -46,7 +47,7 @@ describe "C++ autocompletions", ->
       atom.packages.getActivePackage('autocomplete-clang').mainModule.emitPch editor
     runs ->
       pchFile = [atom.config.get("autocomplete-clang.pchFilePrefix"),'c++','pch'].join '.'
-      expect(fs.statSync(path.join '/tmp', pchFile)).not.toBe(undefined)
+      expect(fs.statSync(path.join os.tmpdir(), pchFile)).not.toBe(undefined)
 
   it "moves cursor to declaration", ->
     editor.setText """
