@@ -25,7 +25,9 @@ describe "C++ autocompletions", ->
     runs ->
       provider = atom.packages.getActivePackage('autocomplete-clang').mainModule.provide()
     waitsForPromise ->
-      atom.workspace.open(path.join(workdir, tmp.tmpNameSync(template: 'XXXXXX.cpp')))
+      filepath = path.join(workdir, tmp.tmpNameSync(template: 'XXXXXX.cpp'))
+      console.log filepath
+      atom.workspace.open(filepath)
     runs ->
       editor = atom.workspace.getActiveTextEditor()
 
