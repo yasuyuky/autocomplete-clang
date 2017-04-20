@@ -64,7 +64,7 @@ describe "C++ autocompletions", ->
     waitsForPromise ->
       atom.packages.getActivePackage('autocomplete-clang').mainModule.goDeclaration editor
     runs ->
-      expect(editor.getCursorBufferPosition()).toEqual({row:3, column:14})
+      expect(editor.getCursorBufferPosition().row).toEqual(3)
 
   it "autcompletes with args in the file", ->
     atom.config.set "autocomplete-clang.argsCountThreshold", 1
