@@ -1,3 +1,6 @@
+## 0.11.2
+* Fix for args length check
+
 ## 0.11.1
 * Change args limit
 
