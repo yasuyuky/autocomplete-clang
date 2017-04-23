@@ -1,5 +1,6 @@
 {BufferedProcess} = require 'atom'
 path = require 'path'
+os = require 'os'
 fs = require 'fs'
 tmp = require 'tmp'
 ClangFlags = require 'clang-flags'
@@ -97,7 +98,7 @@ makeFileBasedArgs = (args, editor)->
   args = args.replace /\\/g, "\\\\"
   args = args.replace /\ /g, "\\\ "
   fileName = tmp.tmpNameSync(template: '.autocomplete-clang-XXXXXX')
-  filePath = path.join (path.dirname editor.getPath()), fileName
+  filePath = path.join os.tmpDir(), fileName
   fs.writeFile filePath, args, (error) ->
     console.error("Error writing file", error) if error
   args = ['@' + filePath]
