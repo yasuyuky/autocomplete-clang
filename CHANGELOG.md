@@ -1,3 +1,6 @@
+## 0.11.3
+* Use temporary directory for args
+
 ## 0.11.2
 * Fix for args length check
 
