@@ -15,7 +15,6 @@ module.exports =
       stderr = (data)-> errors.push data
       if (args.join(" ")).length > (atom.config.get("autocomplete-clang.argsCountThreshold") or 7000)
         [args, filePath] = makeFileBasedArgs args, editor
-        # console.log 'tempfile for args: '+filePath
         exit = (code)->
           fs.unlinkSync filePath
           callback code, (outputs.join '\n'), (errors.join '\n'), resolve
