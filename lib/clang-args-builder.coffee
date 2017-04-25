@@ -15,7 +15,6 @@ module.exports =
       stderr = (data)-> errors.push data
       if (args.join(" ")).length > (atom.config.get("autocomplete-clang.argsCountThreshold") or 7000)
         [args, filePath] = makeFileBasedArgs args, editor
-        console.log 'tempfile for args: '+filePath
         exit = (code)->
           fs.unlinkSync filePath
           callback code, (outputs.join '\n'), (errors.join '\n'), resolve
@@ -96,8 +95,7 @@ makeFileBasedArgs = (args, editor)->
   args = args.join('\n')
   args = args.replace /\\/g, "\\\\"
   args = args.replace /\ /g, "\\\ "
-  fileName = tmp.tmpNameSync(template: '.autocomplete-clang-XXXXXX')
-  filePath = path.join (path.dirname editor.getPath()), fileName
+  filePath = tmp.fileSync().name
   fs.writeFile filePath, args, (error) ->
     console.error("Error writing file", error) if error
   args = ['@' + filePath]
