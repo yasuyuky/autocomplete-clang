@@ -123,20 +123,11 @@ module.exports =
     candidates = aststring.split '\n\n'
     places = []
     for candidate in candidates
-      match = candidate.match ///^Dumping\s(?:[A-Za-z_]*::)*?#{term}:///
-      if match isnt null
-        lines = candidate.split '\n'
-        continue if lines.length < 2
-        declTerms = lines[1].split ' '
-        [_,_,declRangeStr,_,posStr,...] = declTerms
-        [_,_,_,_,declRangeStr,_,posStr,...] = declTerms if declRangeStr is "prev"
-        [_,file,line,col] = declRangeStr.match /<(.*):([0-9]+):([0-9]+),/
-        positions = posStr.match /(line|col):([0-9]+)(?::([0-9]+))?/
-        if positions
-          if positions[1] is 'line'
-            [line,col] = [positions[2], positions[3]]
-          else
-            col = positions[2]
+      match = candidate.match /\w+\s+\w+\s+<([^>]*?):([0-9]+):([0-9]+)(?:, line:([0-9]+):([0-9]+))?(?:, col:([0-9]+))?>(?: line:([0-9]+):([0-9]+))?(?: col:([0-9]+))?/;
+      if match
+        [_,file,line1,col1,line2,col2,col3,line3,col4,col5] = match
+        line = line3 || line2 || line1
+        col = col5 || col4 || col1 || col2 || col3
         places.push [file,(Number line),(Number col)]
     return places
 
