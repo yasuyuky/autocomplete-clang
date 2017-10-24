@@ -28,6 +28,16 @@ class ClangProvider
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
     args = buildCodeCompletionArgs editor, row, column, language
+    for arg in args
+        if arg?
+            start = arg.slice(0, 6)
+            if start == '-std=c'
+                is_cxx_std = arg[6] == '+'
+                is_cxx_file = editor.getGrammar().name != 'C'
+                if is_cxx_std && !is_cxx_file
+                    args.splice(args.indexOf(arg), 1)
+                else if !is_cxx_std && is_cxx_file
+                    args.splice(args.indexOf(arg), 1)
     callback = (code, outputs, errors, resolve) =>
       console.log errors
       resolve(@handleCompletionResult(outputs, code, prefix))
