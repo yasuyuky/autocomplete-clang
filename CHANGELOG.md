@@ -1,3 +1,6 @@
+## 0.11.4
+* Improve AST parsing
+
 ## 0.11.3
 * Use temporary directory for args
 
