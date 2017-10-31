@@ -13,7 +13,8 @@ module.exports =
       [outputs, errors] = [[], []]
       stdout = (data)-> outputs.push data
       stderr = (data)-> errors.push data
-      if (args.join(" ")).length > (atom.config.get("autocomplete-clang.argsCountThreshold") or 7000)
+      argsCountThreshold = atom.config.get("autocomplete-clang.argsCountThreshold")
+      if (args.join(" ")).length > (argsCountThreshold or 7000)
         [args, filePath] = makeFileBasedArgs args, editor
         exit = (code)->
           fs.unlinkSync filePath
