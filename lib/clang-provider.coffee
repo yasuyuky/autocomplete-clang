@@ -9,7 +9,7 @@ path = require 'path'
 
 module.exports =
 class ClangProvider
-  selector: '.source.cpp, .source.c, .source.objc, .source.objcpp'
+  selector: 'c, cpp, .source.cpp, .source.c, .source.objc, .source.objcpp'
   inclusionPriority: 1
 
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->

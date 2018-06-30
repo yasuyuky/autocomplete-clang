@@ -1,6 +1,8 @@
 {Point} = require 'atom'
 
 clangSourceScopeDictionary = {
+  'cpp'           : 'c++'
+  'c'             : 'c' ,
   'source.cpp'    : 'c++' ,
   'source.c'      : 'c' ,
   'source.objc'   : 'objective-c' ,
