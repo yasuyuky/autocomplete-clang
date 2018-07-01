@@ -1,3 +1,6 @@
+## 0.11.5
+* Add support for tree sitter C/C++ #173
+
 ## 0.11.4
 * Improve AST parsing
 
