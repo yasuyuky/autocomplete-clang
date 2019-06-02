@@ -3,7 +3,7 @@ path = require 'path'
 util = require './util'
 {makeBufferedClangProcess}  = require './clang-args-builder'
 {buildGoDeclarationCommandArgs,buildEmitPchCommandArgs} = require './clang-args-builder'
-LocationSelectList = require './location-select-view.coffee'
+SelectList = require 'atom-select-list'
 
 ClangProvider = null
 defaultPrecompiled = require './defaultPrecompiled'
@@ -108,8 +108,32 @@ module.exports =
     if places.length is 1
       @goToLocation editor, places.pop()
     else if places.length > 1
-      list = new LocationSelectList(editor, @goToLocation)
-      list.setItems(places)
+      declList = new SelectList
+        items: places
+        elementForItem: (item) ->
+          element = document.createElement('li')
+          if item[0] is '<stdin>'
+            element.innerHTML = "#{item[1]}:#{item[2]}"
+          else
+            f = path.join(item[0])
+            element.innerHTML "#{f}  #{item[1]}:#{item[2]}"
+          element
+        filterKeyForItem: (item) -> item.label,
+        didConfirmSelection: (item) =>
+          @hideDeclList()
+          @goToLocation editor, item
+        didCancelSelection: () =>
+          @hideDeclList()
+      @lastFocusedElement = document.activeElement
+      @panel = atom.workspace.addModalPanel item: declList
+      declList.focus()
+
+  hideDeclList: ()->
+    if @panel and @panel.destroy
+      @panel.destroy()
+    if @lastFocusedElement
+      @lastFocusedElement.focus()
+      @lastFocusedElement = null
 
   goToLocation: (editor, [file,line,col]) ->
     if file is '<stdin>'

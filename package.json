@@ -10,7 +10,7 @@
     "atom": "^1.0.0"
   },
   "dependencies": {
-    "atom-space-pen-views": "^2.2.0",
+    "atom-select-list": "^0.7.2",
     "clang-flags": "0.2.2",
     "tmp": "0.0.33"
   },
