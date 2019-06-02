@@ -38,7 +38,7 @@ module.exports =
       default: false
     "std c++":
       type: 'string'
-      default: "c++11"
+      default: "c++14"
     "std c":
       type: 'string'
       default: "c99"
