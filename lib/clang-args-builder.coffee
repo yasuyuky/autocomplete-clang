@@ -1,7 +1,8 @@
 {BufferedProcess} = require 'atom'
 path = require 'path'
 fs = require 'fs'
-tmp = require 'tmp'
+os = require 'os'
+uuidv4 = require 'uuid/v4'
 ClangFlags = require 'clang-flags'
 
 module.exports =
@@ -96,8 +97,7 @@ makeFileBasedArgs = (args, editor)->
   args = args.join('\n')
   args = args.replace /\\/g, "\\\\"
   args = args.replace /\ /g, "\\\ "
-  filePath = tmp.fileSync().name
-  fs.writeFile filePath, args, (error) ->
-    console.error("Error writing file", error) if error
+  filePath = path.join(os.tmpdir(), "acargs-"+uuidv4())
+  fs.writeFileSync filePath, args
   args = ['@' + filePath]
   [args, filePath]

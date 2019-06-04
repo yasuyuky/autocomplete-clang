@@ -1,7 +1,7 @@
 os = require 'os'
 fs = require 'fs'
 path = require 'path'
-tmp = require 'tmp'
+uuidv4 = require 'uuid/v4'
 
 describe "C++ autocompletions", ->
   [editor, provider] = []
@@ -25,7 +25,7 @@ describe "C++ autocompletions", ->
     runs ->
       provider = atom.packages.getActivePackage('autocomplete-clang').mainModule.provide()
     waitsForPromise ->
-      atom.workspace.open(path.join(workdir, tmp.tmpNameSync(template: 'XXXXXX.cpp')))
+      atom.workspace.open(path.join(workdir, uuidv4()+".cpp"))
     runs ->
       editor = atom.workspace.getActiveTextEditor()
 
