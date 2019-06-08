@@ -2,7 +2,8 @@
 path = require 'path'
 util = require './util'
 {makeBufferedClangProcess}  = require './clang-args-builder'
-{buildGoDeclarationCommandArgs,buildEmitPchCommandArgs} = require './clang-args-builder'
+{buildGoDeclarationCommandArgs} = require './clang-args-builder'
+pchEmitter = require './pch-emitter'
 SelectList = require 'atom-select-list'
 
 ClangProvider = null
@@ -87,19 +88,7 @@ module.exports =
       resolve(@handleGoDeclarationResult editor, {output:outputs, term:term}, code)
     makeBufferedClangProcess editor, args, callback, editor.getText()
 
-  emitPch: (editor)->
-    lang = util.getFirstCursorSourceScopeLang editor
-    unless lang
-      atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
-      return
-    headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
-    headersInput = ("#include <#{h}>" for h in headers).join "\n"
-    args = buildEmitPchCommandArgs editor, lang
-    callback = (code, outputs, errors, resolve) =>
-      console.log "-emit-pch out\n", outputs
-      console.log "-emit-pch err\n", errors
-      resolve(@handleEmitPchResult code)
-    makeBufferedClangProcess editor, args, callback, headersInput
+  emitPch: (editor) -> pchEmitter.emitPch editor
 
   handleGoDeclarationResult: (editor, result, returnCode)->
     if returnCode is not 0
@@ -167,13 +156,6 @@ module.exports =
               col = positions[2]
             places.push [file,(Number line),(Number col)]
     return places
-
-  handleEmitPchResult: (code)->
-    unless code
-      atom.notifications.addSuccess "Emiting precompiled header has successfully finished"
-      return
-    atom.notifications.addError "Emiting precompiled header exit with #{code}\n"+
-      "See console for detailed error message"
 
   deactivate: ->
     @deactivationDisposables.dispose()
