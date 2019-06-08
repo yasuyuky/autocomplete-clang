@@ -17,7 +17,7 @@ module.exports =
         @emitPch atom.workspace.getActiveTextEditor()
     @deactivationDisposables.add atom.commands.add 'atom-text-editor:not([mini])',
       'autocomplete-clang:go-declaration': (e)=>
-        @goDeclaration atom.workspace.getActiveTextEditor(),e
+        @goDeclaration atom.workspace.getActiveTextEditor(), e
 
   emitPch: (editor) -> pchEmitter.emitPch editor
 
