@@ -3,7 +3,7 @@ pchEmitter = require './pch-emitter'
 jumper = require './jumper'
 
 ClangProvider = null
-defaultPrecompiled = require './defaultPrecompiled'
+defaultPrecompiled = require './default-precompiled'
 
 module.exports =
   config:
