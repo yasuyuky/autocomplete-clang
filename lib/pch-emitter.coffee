@@ -15,7 +15,7 @@ module.exports =
       console.log "-emit-pch out\n", outputs
       console.log "-emit-pch err\n", errors
       resolve(@handleEmitPchResult code)
-    makeBufferedClangProcess editor, args, callback, headersInput
+    makeBufferedClangProcess editor, args, headersInput, callback
 
   handleEmitPchResult: (code)->
     unless code

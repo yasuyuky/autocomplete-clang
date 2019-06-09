@@ -19,7 +19,7 @@ module.exports =
     callback = (code, outputs, errors, resolve) =>
       console.log "GoDecl err\n", errors
       resolve(@handleAstDumpResult editor, {output:outputs, term:term}, code)
-    makeBufferedClangProcess editor, args, callback, editor.getText()
+    makeBufferedClangProcess editor, args, editor.getText(), callback
 
   handleAstDumpResult: (editor, result, returnCode)->
     if returnCode is not 0

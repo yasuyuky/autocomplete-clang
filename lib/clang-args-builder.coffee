@@ -7,7 +7,7 @@ ClangFlags = require 'clang-flags'
 
 module.exports =
 
-  makeBufferedClangProcess: (editor, args, callback, input)->
+  makeBufferedClangProcess: (editor, args, input, callback)->
     new Promise (resolve) ->
       command = atom.config.get "autocomplete-clang.clangCommand"
       options = cwd: path.dirname editor.getPath()

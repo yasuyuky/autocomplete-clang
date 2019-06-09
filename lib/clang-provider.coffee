@@ -31,7 +31,7 @@ class ClangProvider
     callback = (code, outputs, errors, resolve) =>
       console.log errors
       resolve(@handleCompletionResult(outputs, code, prefix))
-    makeBufferedClangProcess editor, args, callback, editor.getText()
+    makeBufferedClangProcess editor, args, editor.getText(), callback
 
   convertCompletionLine: (line, prefix) ->
     contentRe = /^COMPLETION: (.*)/
