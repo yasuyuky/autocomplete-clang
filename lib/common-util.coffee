@@ -18,7 +18,6 @@ module.exports =
     @getSourceScopeLang editor.getCursors()[0].getScopeDescriptor().scopes
 
   getSourceScopeLang: (scopes, scopeDictionary=clangSourceScopeDictionary) ->
-    lang = null
     for scope in scopes
       if scope of scopeDictionary
         return scopeDictionary[scope]
