@@ -16,7 +16,7 @@ module.exports =
       stderr = (data)-> errors.push data
       argsCountThreshold = atom.config.get("autocomplete-clang.argsCountThreshold")
       if (args.join(" ")).length > (argsCountThreshold or 7000)
-        [args, filePath] = makeFileBasedArgs args, editor
+        [args, filePath] = makeFileBasedArgs args
         exit = (code)->
           fs.unlinkSync filePath
           callback code, (outputs.join '\n'), (errors.join '\n'), resolve
@@ -93,7 +93,7 @@ addDocumentationArgs = (args)->
       args.push "-fretain-comments-from-system-headers"
   args
 
-makeFileBasedArgs = (args, editor)->
+makeFileBasedArgs = (args)->
   args = args.join('\n')
   args = args.replace /\\/g, "\\\\"
   args = args.replace /\ /g, "\\\ "
