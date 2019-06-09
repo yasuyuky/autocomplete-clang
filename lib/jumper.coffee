@@ -3,7 +3,7 @@ path = require 'path'
 SelectList = require 'atom-select-list'
 
 {getFirstScopes, getScopeLang} = require './common-util'
-{makeBufferedClangProcess} = require './clang-args-builder'
+{spawnClang} = require './clang-args-builder'
 {buildAstDumpArgs} = require './clang-args-builder'
 
 
@@ -16,7 +16,7 @@ module.exports =
     editor.selectWordsContainingCursors()
     term = editor.getSelectedText()
     args = buildAstDumpArgs editor, lang, term
-    makeBufferedClangProcess editor, args, editor.getText(),
+    spawnClang editor, args, editor.getText(),
       (code, outputs, errors, resolve) =>
         console.log "GoDecl err\n", errors
         resolve(@handleAstDumpResult editor, {output:outputs, term:term}, code)

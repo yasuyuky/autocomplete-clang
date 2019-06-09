@@ -4,7 +4,7 @@
 
 {Range, CompositeDisposable} = require 'atom'
 path = require 'path'
-{makeBufferedClangProcess, buildCodeCompletionArgs} = require './clang-args-builder'
+{spawnClang, buildCodeCompletionArgs} = require './clang-args-builder'
 {getScopeLang, prefixAtPosition, nearestSymbolPosition} = require './common-util'
 
 module.exports =
@@ -28,7 +28,7 @@ class ClangProvider
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
     args = buildCodeCompletionArgs editor, row, column, language
-    makeBufferedClangProcess editor, args, editor.getText(),
+    spawnClang editor, args, editor.getText(),
       (code, outputs, errors, resolve) =>
         console.log errors
         resolve(@handleCompletionResult(outputs, code, prefix))

@@ -1,5 +1,5 @@
 {getFirstScopes, getScopeLang} = require './common-util'
-{makeBufferedClangProcess}  = require './clang-args-builder'
+{spawnClang}  = require './clang-args-builder'
 {buildEmitPchArgs} = require './clang-args-builder'
 
 module.exports =
@@ -11,7 +11,7 @@ module.exports =
     headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
     headersInput = ("#include <#{h}>" for h in headers).join "\n"
     args = buildEmitPchArgs editor, lang
-    makeBufferedClangProcess editor, args, headersInput, 
+    spawnClang editor, args, headersInput,
       (code, outputs, errors, resolve) =>
         console.log "-emit-pch out\n", outputs
         console.log "-emit-pch err\n", errors
