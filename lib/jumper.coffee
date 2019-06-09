@@ -28,25 +28,28 @@ module.exports =
     if places.length is 1
       @goToLocation editor, places.pop()
     else if places.length > 1
-      declList = new SelectList
-        items: places
-        elementForItem: (item) ->
-          element = document.createElement('li')
-          if item[0] is '<stdin>'
-            element.innerHTML = "#{item[1]}:#{item[2]}"
-          else
-            f = path.join(item[0])
-            element.innerHTML "#{f}  #{item[1]}:#{item[2]}"
-          element
-        filterKeyForItem: (item) -> item.label,
-        didConfirmSelection: (item) =>
-          @hideDeclList()
-          @goToLocation editor, item
-        didCancelSelection: () =>
-          @hideDeclList()
+      declList = @createDeclList places
       @lastFocusedElement = document.activeElement
       @panel = atom.workspace.addModalPanel item: declList
       declList.focus()
+
+  createDeclList: (places) ->
+    new SelectList
+      items: places
+      elementForItem: (item) ->
+        element = document.createElement('li')
+        if item[0] is '<stdin>'
+          element.innerHTML = "#{item[1]}:#{item[2]}"
+        else
+          f = path.join(item[0])
+          element.innerHTML "#{f}  #{item[1]}:#{item[2]}"
+        element
+      filterKeyForItem: (item) -> item.label,
+      didConfirmSelection: (item) =>
+        @hideDeclList()
+        @goToLocation editor, item
+      didCancelSelection: () =>
+        @hideDeclList()
 
   hideDeclList: ()->
     if @panel and @panel.destroy
