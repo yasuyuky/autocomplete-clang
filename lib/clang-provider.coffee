@@ -5,7 +5,7 @@
 {Range, CompositeDisposable} = require 'atom'
 path = require 'path'
 {makeBufferedClangProcess, buildCodeCompletionArgs} = require './clang-args-builder'
-{getSourceScopeLang, prefixAtPosition, nearestSymbolPosition} = require './common-util'
+{getScopeLang, prefixAtPosition, nearestSymbolPosition} = require './common-util'
 
 module.exports =
 class ClangProvider
@@ -13,7 +13,7 @@ class ClangProvider
   inclusionPriority: 1
 
   getSuggestions: ({editor, scopeDescriptor, bufferPosition}) ->
-    language = getSourceScopeLang scopeDescriptor.getScopesArray()
+    language = getScopeLang scopeDescriptor.getScopesArray()
     prefix = prefixAtPosition(editor, bufferPosition)
     [symbolPosition,lastSymbol] = nearestSymbolPosition(editor, bufferPosition)
     minimumWordLength = atom.config.get('autocomplete-plus.minimumWordLength')
