@@ -19,8 +19,7 @@ module.exports =
 
   getSourceScopeLang: (scopes, scopeDictionary=clangSourceScopeDictionary) ->
     for scope in scopes
-      if scope of scopeDictionary
-        return scopeDictionary[scope]
+      return scopeDictionary[scope] if scope of scopeDictionary
 
   prefixAtPosition: (editor, bufferPosition) ->
     regex = /\w+$/
