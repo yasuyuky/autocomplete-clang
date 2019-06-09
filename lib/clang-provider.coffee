@@ -28,10 +28,10 @@ class ClangProvider
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
     args = buildCodeCompletionArgs editor, row, column, language
-    callback = (code, outputs, errors, resolve) =>
-      console.log errors
-      resolve(@handleCompletionResult(outputs, code, prefix))
-    makeBufferedClangProcess editor, args, editor.getText(), callback
+    makeBufferedClangProcess editor, args, editor.getText(),
+      (code, outputs, errors, resolve) =>
+        console.log errors
+        resolve(@handleCompletionResult(outputs, code, prefix))
 
   convertCompletionLine: (line, prefix) ->
     contentRe = /^COMPLETION: (.*)/
