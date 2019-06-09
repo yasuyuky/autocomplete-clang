@@ -1,6 +1,6 @@
 {Point} = require 'atom'
 
-clangSourceScopeDictionary = {
+scopeDictionary = {
   'cpp'           : 'c++'
   'c'             : 'c' ,
   'source.cpp'    : 'c++' ,
@@ -17,7 +17,7 @@ module.exports =
   getFirstCursorSourceScopeLang: (editor) ->
     @getSourceScopeLang editor.getCursors()[0].getScopeDescriptor().scopes
 
-  getSourceScopeLang: (scopes, scopeDictionary=clangSourceScopeDictionary) ->
+  getSourceScopeLang: (scopes) ->
     for scope in scopes
       return scopeDictionary[scope] if scope of scopeDictionary
 
