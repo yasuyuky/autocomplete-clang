@@ -10,12 +10,12 @@ module.exports =
       return
     headers = atom.config.get "autocomplete-clang.preCompiledHeaders #{lang}"
     headersInput = ("#include <#{h}>" for h in headers).join "\n"
+    cwd = path.dirname editor.getPath()
     args = buildEmitPchArgs editor, lang
-    spawnClang editor, args, headersInput,
-      (code, outputs, errors, resolve) =>
-        console.log "-emit-pch out\n", outputs
-        console.log "-emit-pch err\n", errors
-        resolve(@handleEmitPchResult code)
+    spawnClang cwd, args, headersInput, (code, outputs, errors, resolve) =>
+      console.log "-emit-pch out\n", outputs
+      console.log "-emit-pch err\n", errors
+      resolve(@handleEmitPchResult code)
 
   handleEmitPchResult: (code)->
     unless code

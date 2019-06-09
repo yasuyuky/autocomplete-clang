@@ -27,11 +27,11 @@ class ClangProvider
       @codeCompletionAt(editor, symbolPosition.row, symbolPosition.column, language, prefix)
 
   codeCompletionAt: (editor, row, column, language, prefix) ->
+    cwd = path.dirname editor.getPath()
     args = buildCodeCompletionArgs editor, row, column, language
-    spawnClang editor, args, editor.getText(),
-      (code, outputs, errors, resolve) =>
-        console.log errors
-        resolve(@handleCompletionResult(outputs, code, prefix))
+    spawnClang cwd, args, editor.getText(), (code, outputs, errors, resolve) =>
+      console.log errors
+      resolve(@handleCompletionResult(outputs, code, prefix))
 
   convertCompletionLine: (line, prefix) ->
     contentRe = /^COMPLETION: (.*)/

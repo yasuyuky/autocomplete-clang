@@ -15,11 +15,11 @@ module.exports =
       return
     editor.selectWordsContainingCursors()
     term = editor.getSelectedText()
+    cwd = path.dirname editor.getPath()
     args = buildAstDumpArgs editor, lang, term
-    spawnClang editor, args, editor.getText(),
-      (code, outputs, errors, resolve) =>
-        console.log "GoDecl err\n", errors
-        resolve(@handleAstDumpResult editor, {output:outputs, term:term}, code)
+    spawnClang cwd, args, editor.getText(), (code, outputs, errors, resolve) =>
+      console.log "GoDecl err\n", errors
+      resolve(@handleAstDumpResult editor, {output:outputs, term:term}, code)
 
   handleAstDumpResult: (editor, result, returnCode)->
     if returnCode is not 0

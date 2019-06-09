@@ -7,10 +7,10 @@ ClangFlags = require 'clang-flags'
 
 module.exports =
 
-  spawnClang: (editor, args, input, callback)->
+  spawnClang: (cwd, args, input, callback)->
     new Promise (resolve) ->
       command = atom.config.get "autocomplete-clang.clangCommand"
-      options = cwd: path.dirname editor.getPath()
+      options = cwd: cwd
       [outputs, errors] = [[], []]
       stdout = (data)-> outputs.push data
       stderr = (data)-> errors.push data
