@@ -14,8 +14,8 @@ scopeDictionary = {
 }
 
 module.exports =
-  getFirstCursorSourceScopeLang: (editor) ->
-    @getScopeLang editor.getCursors()[0].getScopeDescriptor().scopes
+  getFirstScopes: (editor) ->
+    editor.getCursors()[0].getScopeDescriptor().scopes
 
   getScopeLang: (scopes) ->
     for scope in scopes

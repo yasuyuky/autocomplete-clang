@@ -1,10 +1,10 @@
-commonUtil = require './common-util'
+{getFirstScopes, getScopeLang} = require './common-util'
 {makeBufferedClangProcess}  = require './clang-args-builder'
 {buildEmitPchCommandArgs} = require './clang-args-builder'
 
 module.exports =
   emitPch: (editor)->
-    lang = commonUtil.getFirstCursorSourceScopeLang editor
+    lang = getScopeLang (getFirstScopes editor)
     unless lang
       atom.notifications.addError "autocomplete-clang:emit-pch\nError: Incompatible Language"
       return

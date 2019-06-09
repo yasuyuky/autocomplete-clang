@@ -1,14 +1,14 @@
 {File} = require 'atom'
 path = require 'path'
-commonUtil = require './common-util'
 
+{getFirstScopes, getScopeLang} = require './common-util'
 {makeBufferedClangProcess} = require './clang-args-builder'
 {buildGoDeclarationCommandArgs} = require './clang-args-builder'
 
 
 module.exports =
   goDeclaration: (editor,e)->
-    lang = commonUtil.getFirstCursorSourceScopeLang editor
+    lang = getScopeLang (getFirstScopes editor)
     unless lang
       e.abortKeyBinding()
       return
