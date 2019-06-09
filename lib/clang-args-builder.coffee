@@ -28,7 +28,7 @@ module.exports =
       bufferedProcess.process.stdin.end()
 
   buildCodeCompletionArgs: (editor, row, column, language) ->
-    {std, filePath, currentDir, pchPath} = getCommonArgs editor,language
+    {std, filePath, currentDir, pchPath} = getCommons editor,language
     args = []
     args.push "-fsyntax-only"
     args.push "-x#{language}"
@@ -37,8 +37,8 @@ module.exports =
     args.push("-include-pch", pchPath) if fs.existsSync(pchPath)
     addCommonArgs args, std, currentDir, pchPath, filePath
 
-  buildGoDeclarationCommandArgs: (editor, language, term)->
-    {std, filePath, currentDir, pchPath} = getCommonArgs editor,language
+  buildAstDumpArgs: (editor, language, term)->
+    {std, filePath, currentDir, pchPath} = getCommons editor,language
     args = []
     args.push "-fsyntax-only"
     args.push "-x#{language}"
@@ -48,14 +48,14 @@ module.exports =
     args.push("-include-pch", pchPath) if fs.existsSync(pchPath)
     addCommonArgs args, std, currentDir, pchPath, filePath
 
-  buildEmitPchCommandArgs: (editor, language)->
-    {std, filePath, currentDir, pchPath} = getCommonArgs editor,language
+  buildEmitPchArgs: (editor, language)->
+    {std, filePath, currentDir, pchPath} = getCommons editor,language
     args = []
     args.push "-x#{language}-header"
     args.push "-Xclang", "-emit-pch", "-o", pchPath
     addCommonArgs args, std, currentDir, pchPath, filePath
 
-getCommonArgs = (editor, language)->
+getCommons = (editor, language)->
   pchFilePrefix = atom.config.get "autocomplete-clang.pchFilePrefix"
   pchFile = [pchFilePrefix, language, "pch"].join '.'
   filePath = editor.getPath()

@@ -4,7 +4,7 @@ SelectList = require 'atom-select-list'
 
 {getFirstScopes, getScopeLang} = require './common-util'
 {makeBufferedClangProcess} = require './clang-args-builder'
-{buildGoDeclarationCommandArgs} = require './clang-args-builder'
+{buildAstDumpArgs} = require './clang-args-builder'
 
 
 module.exports =
@@ -15,18 +15,18 @@ module.exports =
       return
     editor.selectWordsContainingCursors()
     term = editor.getSelectedText()
-    args = buildGoDeclarationCommandArgs editor, lang, term
+    args = buildAstDumpArgs editor, lang, term
     callback = (code, outputs, errors, resolve) =>
       console.log "GoDecl err\n", errors
-      resolve(@handleGoDeclarationResult editor, {output:outputs, term:term}, code)
+      resolve(@handleAstDumpResult editor, {output:outputs, term:term}, code)
     makeBufferedClangProcess editor, args, callback, editor.getText()
 
-  handleGoDeclarationResult: (editor, result, returnCode)->
+  handleAstDumpResult: (editor, result, returnCode)->
     if returnCode is not 0
       return unless atom.config.get "autocomplete-clang.ignoreClangErrors"
     places = @parseAstDump result.output, result.term
     if places.length is 1
-      @goToLocation editor, places.pop()
+      @jumpToLocation editor, places.pop()
     else if places.length > 1
       declList = @createDeclList places
       @lastFocusedElement = document.activeElement
@@ -47,7 +47,7 @@ module.exports =
       filterKeyForItem: (item) -> item.label,
       didConfirmSelection: (item) =>
         @hideDeclList()
-        @goToLocation editor, item
+        @jumpToLocation editor, item
       didCancelSelection: () =>
         @hideDeclList()
 
@@ -58,7 +58,7 @@ module.exports =
       @lastFocusedElement.focus()
       @lastFocusedElement = null
 
-  goToLocation: (editor, [file,line,col]) ->
+  jumpToLocation: (editor, [file,line,col]) ->
     if file is '<stdin>'
       return editor.setCursorBufferPosition [line-1,col-1]
     file = path.join editor.getDirectoryPath(), file if file.startsWith(".")
