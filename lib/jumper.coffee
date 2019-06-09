@@ -1,5 +1,6 @@
 {File} = require 'atom'
 path = require 'path'
+SelectList = require 'atom-select-list'
 
 {getFirstScopes, getScopeLang} = require './common-util'
 {makeBufferedClangProcess} = require './clang-args-builder'
