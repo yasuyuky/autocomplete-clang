@@ -1,3 +1,5 @@
+path = require 'path'
+
 {getFirstScopes, getScopeLang} = require './common-util'
 {spawnClang}  = require './clang-args-builder'
 {buildEmitPchArgs} = require './clang-args-builder'
