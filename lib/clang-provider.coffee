@@ -5,7 +5,7 @@
 {Range, CompositeDisposable} = require 'atom'
 path = require 'path'
 {makeBufferedClangProcess, buildCodeCompletionArgs} = require './clang-args-builder'
-{getSourceScopeLang, prefixAtPosition, nearestSymbolPosition} = require './util'
+{getSourceScopeLang, prefixAtPosition, nearestSymbolPosition} = require './common-util'
 
 module.exports =
 class ClangProvider

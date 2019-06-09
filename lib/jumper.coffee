@@ -1,6 +1,6 @@
 {File} = require 'atom'
 path = require 'path'
-util = require './util'
+commonUtil = require './common-util'
 
 {makeBufferedClangProcess} = require './clang-args-builder'
 {buildGoDeclarationCommandArgs} = require './clang-args-builder'
@@ -8,7 +8,7 @@ util = require './util'
 
 module.exports =
   goDeclaration: (editor,e)->
-    lang = util.getFirstCursorSourceScopeLang editor
+    lang = commonUtil.getFirstCursorSourceScopeLang editor
     unless lang
       e.abortKeyBinding()
       return
