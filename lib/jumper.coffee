@@ -3,8 +3,7 @@ path = require 'path'
 SelectList = require 'atom-select-list'
 
 {getFirstScopes, getScopeLang} = require './common-util'
-{spawnClang} = require './clang-args-builder'
-{buildAstDumpArgs} = require './clang-args-builder'
+{spawnClang, buildAstDumpArgs} = require './clang-args-builder'
 
 
 module.exports =
