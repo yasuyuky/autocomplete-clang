@@ -1,8 +1,7 @@
 path = require 'path'
 
 {getFirstScopes, getScopeLang} = require './common-util'
-{spawnClang}  = require './clang-args-builder'
-{buildEmitPchArgs} = require './clang-args-builder'
+{spawnClang, buildEmitPchArgs}  = require './clang-args-builder'
 
 module.exports =
   emitPch: (editor)->
