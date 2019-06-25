@@ -1,3 +1,7 @@
+## 0.12.0
+* Remove dependency to tmp
+* Refactor
+
 ## 0.11.5
 * Add support for tree sitter C/C++ #173
 
