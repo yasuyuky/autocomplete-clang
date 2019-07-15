@@ -20,5 +20,9 @@
         "2.0.0": "provide"
       }
     }
+  },
+  "devDependencies": {
+    "@types/atom": "^1.36.1",
+    "tslint": "^5.17.0"
   }
 }
