@@ -27,12 +27,12 @@ module.exports =
     if places.length is 1
       @jumpToLocation editor, places.pop()
     else if places.length > 1
-      declList = @createDeclList places
+      declList = @createDeclList editor, places
       @lastFocusedElement = document.activeElement
       @panel = atom.workspace.addModalPanel item: declList
       declList.focus()
 
-  createDeclList: (places) ->
+  createDeclList: (editor, places) ->
     new SelectList
       items: places
       elementForItem: (item) ->
