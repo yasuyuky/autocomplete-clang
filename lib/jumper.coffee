@@ -68,8 +68,10 @@ module.exports =
   parseAstDump: (aststring, term)->
     candidates = aststring.split '\n\n'
     places = []
+    escapedTerm = term.match /[A-Za-z_][A-Za-z0-9_]*/
+    return [] if escapedTerm is null
     for candidate in candidates
-      match = candidate.match ///^Dumping\s(?:[A-Za-z_]*::)*?#{term}:///
+      match = candidate.match ///^Dumping\s(?:[A-Za-z_]*::)*?#{escapedTerm}:///
       if match isnt null
         lines = candidate.split '\n'
         continue if lines.length < 2
