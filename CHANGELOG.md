@@ -1,3 +1,6 @@
+## 0.12.1
+* Fix broken jump
+
 ## 0.12.0
 * Remove dependency to tmp
 * Refactor
