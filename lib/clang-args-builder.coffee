@@ -2,7 +2,7 @@
 path = require 'path'
 fs = require 'fs'
 os = require 'os'
-uuidv4 = require 'uuid/v4'
+{ v4: uuidv4 } = require 'uuid';
 ClangFlags = require 'clang-flags'
 
 module.exports =

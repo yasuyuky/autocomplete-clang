@@ -1,7 +1,7 @@
 os = require 'os'
 fs = require 'fs'
 path = require 'path'
-uuidv4 = require 'uuid/v4'
+{ v4: uuidv4 } = require 'uuid';
 
 describe "C++ autocompletions", ->
   [editor, provider] = []
