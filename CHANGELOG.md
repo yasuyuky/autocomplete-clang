@@ -1,3 +1,7 @@
+## 0.13.0
+
+- Update dependencies
+
 ## 0.12.1
 
 - Fix broken jump
