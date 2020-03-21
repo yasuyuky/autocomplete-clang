@@ -1,3 +1,7 @@
+## 0.13.1
+
+- Update dependencies (Including security fix)
+
 ## 0.13.0
 
 - Update dependencies
