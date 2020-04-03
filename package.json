@@ -23,6 +23,6 @@
   },
   "devDependencies": {
     "@types/atom": "^1.40.1",
-    "tslint": "^6.1.0"
+    "tslint": "^6.1.1"
   }
 }
