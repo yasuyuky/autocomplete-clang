@@ -12,7 +12,7 @@
   "dependencies": {
     "atom-select-list": "^0.7.2",
     "clang-flags": "0.2.2",
-    "uuid": "^7.0.3"
+    "uuid": "^8.0.0"
   },
   "providedServices": {
     "autocomplete.provider": {
