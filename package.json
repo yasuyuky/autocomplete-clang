@@ -10,7 +10,7 @@
     "atom": "^1.0.0"
   },
   "dependencies": {
-    "atom-select-list": "^0.7.2",
+    "atom-select-list": "^0.8.0",
     "clang-flags": "0.2.2",
     "uuid": "^8.3.2"
   },
